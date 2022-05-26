@@ -78,7 +78,7 @@ const UserBlock = () => {
   const { logout } = useAuthContext();
   const { currentUser } = auth;
   return (
-    <div className="flex align-center justify-center p-2 bg-gray-900 text-gray-400">
+    <div className="fixed w-[250px] bottom-0 flex align-center justify-center m-t-[auto] p-2 bg-gray-900/50 text-gray-400">
       <img
         className="rounded-full w-9"
         src={currentUser.photoURL}
