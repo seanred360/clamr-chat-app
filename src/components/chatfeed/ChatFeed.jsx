@@ -33,7 +33,6 @@ const ChatFeed = () => {
             photoURL={message.photoURL}
             time={message.time}
             content={message.content}
-            reactions={message.reactions}
           />
         ))}
       </div>

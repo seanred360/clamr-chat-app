@@ -11,6 +11,11 @@ const EditMessage = ({ id, content, onHide }) => {
     }
   };
 
+  useEffect(() => {
+    window.addEventListener("keydown", handleCancel, false);
+    return () => window.removeEventListener("keydown", handleCancel, false);
+  }, []);
+
   const handleSetDoc = async (e) => {
     e.preventDefault();
     const docRef = doc(db, "messages", id);
@@ -18,11 +23,6 @@ const EditMessage = ({ id, content, onHide }) => {
     await setDoc(docRef, payload, { merge: true });
     onHide();
   };
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleCancel, false);
-    return () => window.removeEventListener("keydown", handleCancel, false);
-  }, []);
 
   return (
     <form onSubmit={(e) => handleSetDoc(e)}>
