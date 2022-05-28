@@ -12,6 +12,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
 
 const Post = ({ id, displayName, photoURL, time, content }) => {
   const [showInput, setShowInput] = useState(false);
@@ -30,7 +31,7 @@ const Post = ({ id, displayName, photoURL, time, content }) => {
   const handleSetReaction = async (emoji) => {
     const docRef = doc(db, `messages/${id}/reactions/${emoji}`);
     const docSnap = await (await getDoc(docRef)).data();
-    const payload = { ...docSnap, [displayName]: `${emoji}` };
+    const payload = { ...docSnap, [auth.currentUser.displayName]: `${emoji}` };
     await setDoc(docRef, payload);
   };
 
