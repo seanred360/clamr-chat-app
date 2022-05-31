@@ -7,16 +7,36 @@ import {
   FaSun,
 } from "react-icons/fa";
 import useDarkMode from "./hooks/useDarkMode";
+import { FaUserFriends } from "react-icons/fa";
 
 const TopNavigation = () => {
   return (
     <div className="top-navigation">
-      <HashtagIcon />
-      <Title />
+      {/* <HashtagIcon /> */}
+      <FriendsToolbar />
+      {/* <Title /> */}
       <ThemeIcon />
       <Search />
       <BellIcon />
       <UserCircle />
+    </div>
+  );
+};
+
+const FriendsToolbar = () => {
+  return (
+    <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
+      <span className="mr-3 text-xl text-gray-500">
+        <FaUserFriends />
+      </span>
+      <span className="pr-3 border-r-[1px] border-gray-600 font-bold tracking-wide">
+        Friends
+      </span>
+      <button className="friendsToolbarButton">Online</button>
+      <button className="friendsToolbarButton">All</button>
+      <button className="friendsToolbarButton">Pending</button>
+      <button className="friendsToolbarButton">Blocked</button>
+      <button className="friendsToolbarButton text-green-600">Add Friend</button>
     </div>
   );
 };

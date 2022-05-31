@@ -10,8 +10,6 @@ import {
   signInAnonymously,
   getAuth,
   signOut,
-  onAuthStateChanged,
-  createUser,
   updateProfile,
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";

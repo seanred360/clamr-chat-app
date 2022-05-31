@@ -14,7 +14,7 @@ import {
 import { db } from "../firebaseConfig";
 import { auth } from "../firebaseConfig";
 
-const Post = ({ id, displayName, photoURL, time, content }) => {
+const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
   const [showInput, setShowInput] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [reactions, setReactions] = useState();
@@ -32,6 +32,16 @@ const Post = ({ id, displayName, photoURL, time, content }) => {
     const docRef = doc(db, `messages/${id}/reactions/${emoji}`);
     const docSnap = await (await getDoc(docRef)).data();
     const payload = { ...docSnap, [auth.currentUser.displayName]: `${emoji}` };
+    await setDoc(docRef, payload);
+  };
+
+  const handleDeleteReaction = async (reaction) => {
+    const docRef = doc(db, `messages/${id}/reactions/${reaction}`);
+    const docSnap = await (await getDoc(docRef)).data();
+    const payload = {
+      ...docSnap,
+      [auth.currentUser.displayName]: `${reaction}`,
+    };
     await setDoc(docRef, payload);
   };
 
@@ -136,16 +146,16 @@ const MessageToolbarButtons = ({
 };
 
 const ReactionsGroup = ({ reactions, showPicker, setShowPicker }) => {
-  if (!reactions) return null;
+  if (!reactions[0]) return null;
   return (
     <div className="max-w-xs flex items-center flex-wrap">
       {Object.keys(reactions).map((reaction, index) => (
-        <span
+        <button
           key={uuidv4()}
           className="group-tooltip-emoji relative mr-2 px-1.5 py-0.5 text-sm bg-indigo-700/25 border-indigo-500 text-white border rounded-lg"
         >
           {reactions[index].id} {Object.keys(reactions[index]).length - 1}
-          <div className="group-tooltip-emoji-hover:scale-100 tooltip mb-2 left-0 flex items-center ">
+          <div className="group-tooltip-emoji-hover:scale-100 tooltip mb-2 left-0 flex items-center hover:bg-gray-900 cursor-default">
             <span className="text-5xl">{reactions[index].id}</span>
             <span>
               {(Object.keys(reactions[index]) + "")
@@ -154,7 +164,7 @@ const ReactionsGroup = ({ reactions, showPicker, setShowPicker }) => {
                 .slice(0, -3)}
             </span>
           </div>
-        </span>
+        </button>
       ))}
       <button
         className="group-tooltip-emoji py-2 text-gray-500 opacity-0 text-xl hover:text-gray-400 hover:opacity-100"
@@ -166,4 +176,4 @@ const ReactionsGroup = ({ reactions, showPicker, setShowPicker }) => {
   );
 };
 
-export default Post;
+export default ChatMessage;

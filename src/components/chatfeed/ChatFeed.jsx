@@ -1,24 +1,28 @@
 import TopNavigation from "../TopNavigation";
 import BottomBar from "./BottomBar";
-import Post from "./Post";
+import ChatMessage from "./ChatMessage";
 import { useEffect, useState } from "react";
 import { db } from "../firebaseConfig";
-import { onSnapshot, collection } from "firebase/firestore";
+import { onSnapshot, collection, doc } from "firebase/firestore";
 
-const ChatFeed = () => {
+const ChatFeed = ({ chatRoomUid }) => {
   const [messages, setMessages] = useState([
     { name: "Loading...", id: "initial" },
   ]);
 
-  useEffect(
-    () =>
-      onSnapshot(collection(db, "messages"), (snapshot) =>
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "chats", chatRoomUid, "messages"),
+      (snapshot) => {
         setMessages(
           snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })).reverse()
-        )
-      ),
-    []
-  );
+        );
+      }
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [chatRoomUid]);
 
   return (
     <div className="content-container">
@@ -26,7 +30,7 @@ const ChatFeed = () => {
       <div className="content-list z-10">
         {/* TODO order messages by date */}
         {messages.map((message) => (
-          <Post
+          <ChatMessage
             key={message.id}
             id={message.id}
             displayName={message.displayName}
@@ -36,7 +40,7 @@ const ChatFeed = () => {
           />
         ))}
       </div>
-      <BottomBar />
+      <BottomBar chatRoomUid={chatRoomUid} />
     </div>
   );
 };

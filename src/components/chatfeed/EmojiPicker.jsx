@@ -6,7 +6,6 @@ const EmojiPicker = ({
   onCancel,
   onEmojiSelect,
 }) => {
-  
   const handleCancel = (e) => {
     if (e.isComposing || e.keyCode === 27) {
       onCancel();
@@ -136,11 +135,11 @@ const EmojiPicker = ({
   return (
     <>
       <div className="fixed right-10 bottom-20 z-[100]">
-        <div className="relative w-[300px] h-[300px] flex flex-wrap overflow-y-scroll align-center justify-left p-2 rounded-2xl bg-white">
+        <div className="relative w-[300px] h-[300px] flex flex-wrap overflow-y-scroll align-center justify-left p-2 rounded-xl bg-white">
           {smileys.map((emoji) => (
             <button
               key={emoji}
-              className="text-4xl p-2 hover:bg-black"
+              className="text-4xl p-2 hover:bg-gray-400 rounded-xl"
               onClick={() => onEmojiSelect(emoji)}
             >
               {emoji}

@@ -4,7 +4,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useAuthContext } from "../AuthContext";
 
-const BottomBar = () => {
+const BottomBar = ({ chatRoomUid }) => {
   const [input, setInput] = useState("");
   const { user } = useAuthContext();
 
@@ -18,7 +18,7 @@ const BottomBar = () => {
 
   const handleNewDoc = async (content) => {
     const { displayName, photoURL } = user;
-    const collectionRef = collection(db, "messages");
+    const collectionRef = collection(db, `chats/${chatRoomUid}/messages`);
     // TODO change date to human readable format
     const payload = {
       content,

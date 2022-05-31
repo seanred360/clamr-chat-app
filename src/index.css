@@ -9,6 +9,11 @@
   padding: 0;
 }
 
+main {
+  font-family: "ABC Ginto Normal", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+}
+
 @layer components {
   .sidebar-icon {
     @apply relative flex items-center justify-center 
@@ -99,10 +104,26 @@
   }
 
   .content-list {
-    @apply flex flex-col items-center 
+    @apply flex flex-col items-center justify-start
     h-full w-full 
-    mt-0 ml-0 mx-auto px-0 pb-12
-    overflow-y-scroll;
+    mt-0 ml-0 mx-auto p-6 pb-12
+    overflow-y-scroll
+    z-10;
+  }
+
+  .friendListItem {
+    @apply w-full;
+  }
+
+  .friend {
+    @apply w-full h-16 flex items-center justify-center
+    p-2 border-t-[1px] border-gray-600 
+    text-gray-400 hover:bg-gray-600/50 hover:rounded-md;
+  }
+
+  .friendsToolbarButton {
+    @apply mx-3 p-1 rounded-md hover:bg-gray-600/50
+    text-gray-400 text-sm tracking-wide;
   }
 
   .post {
@@ -166,8 +187,8 @@
   }
 
   .channel-container {
-    @apply flex flex-col items-center justify-start 
-    p-1 m-0;
+    @apply w-full flex flex-col items-center justify-start 
+    p-2 m-0 text-white;
   }
 
   .channel-block {

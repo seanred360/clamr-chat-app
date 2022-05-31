@@ -2,23 +2,51 @@ import { useState } from "react";
 import { BsHash } from "react-icons/bs";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
+import { FaUserFriends } from "react-icons/fa";
+import { IoLogoIonitron } from "react-icons/io";
 
 import { useAuthContext } from "./AuthContext";
-import { auth } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig";
 
-const topics = ["tailwind-css", "react"];
-const questions = ["jit-compilation", "purge-files", "dark-mode"];
-const random = ["variants", "plugins"];
-
-const ChannelBar = () => {
+const ChannelBar = ({
+  currentUserData,
+  friends,
+  onClickFriend,
+  onChangeChannel,
+}) => {
   return (
-    <div className="channel-bar shadow-lg">
-      <ChannelBlock />
-      <div className="channel-container">
-        <Dropdown header="Topics" selections={topics} />
-        <Dropdown header="Questions" selections={questions} />
-        <Dropdown header="Random" selections={random} />
-      </div>
+    <div className="channel-bar shadow-lg p-2 text-white">
+      <ChannelBlock channelName={"Home"} />
+
+      <button
+        className="w-full h-10 flex items-center justify-left p-3 
+        bg-gray-600 rounded-md text-base text-center"
+        onClick={onChangeChannel}
+      >
+        <span className="mr-3 text-xl">
+          <FaUserFriends />
+        </span>
+        <span>Friends</span>
+      </button>
+      <button className="w-full h-10 flex items-center justify-left p-3 rounded-md text-base text-center text-gray-500">
+        <span className="mr-3 text-xl">
+          <IoLogoIonitron />
+        </span>
+        <span>Nitro</span>
+      </button>
+      <span className="w-full h-10 flex items-center justify-between p-3 rounded-md text-base text-center text-gray-500">
+        DIRECT MESSAGES
+        {/* <button onClick={(e) => onCreateRoom(e)}>+</button> */}
+      </span>
+      {friends &&
+        friends.map((friend) => (
+          <FriendDM
+            key={friend.uid + "DM"}
+            displayName={friend.displayName}
+            photoURL={friend.photoURL}
+            onClickFriend={() => onClickFriend(friend.uid)}
+          />
+        ))}
       <UserBlock />
     </div>
   );
@@ -68,11 +96,27 @@ const TopicSelection = ({ selection }) => (
   </div>
 );
 
-const ChannelBlock = () => (
+const ChannelBlock = ({ channelName }) => (
   <div className="channel-block">
-    <h5 className="channel-block-text">Channels</h5>
+    <h5 className="channel-block-text">{channelName}</h5>
   </div>
 );
+
+const FriendDM = ({ displayName, photoURL, onClickFriend }) => {
+  return (
+    <button
+      className="w-[250px] flex align-center justify-center m-t-[auto] p-2 
+    text-gray-400 hover:bg-gray-600 rounded-md"
+      onClick={onClickFriend}
+    >
+      <img className="rounded-full w-9" src={photoURL} alt="user avatar" />
+      <span className="relative before:absolute before:-inset-1 before:bg-green-500 before:rounded-full w-1 h-1"></span>
+      <span className="text-white font-bold my-auto mr-auto ml-3">
+        {displayName}
+      </span>
+    </button>
+  );
+};
 
 const UserBlock = () => {
   const { logout } = useAuthContext();
