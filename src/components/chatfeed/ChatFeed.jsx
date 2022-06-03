@@ -32,7 +32,8 @@ const ChatFeed = ({ chatRoomUid }) => {
         {messages.map((message) => (
           <ChatMessage
             key={message.id}
-            id={message.id}
+            chatRoomUid={chatRoomUid}
+            messageUid={message.id}
             displayName={message.displayName}
             photoURL={message.photoURL}
             time={message.time}

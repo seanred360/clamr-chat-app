@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BsHash } from "react-icons/bs";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
@@ -7,12 +7,14 @@ import { IoLogoIonitron } from "react-icons/io";
 
 import { useAuthContext } from "./AuthContext";
 import { auth, db } from "./firebaseConfig";
+import { collection, where, query, getDocs } from "firebase/firestore";
 
 const ChannelBar = ({
   currentUserData,
-  friends,
-  onClickFriend,
+  chatRooms,
+  onClickChat,
   onChangeChannel,
+  onCreateChatRoom,
 }) => {
   return (
     <div className="channel-bar shadow-lg p-2 text-white">
@@ -36,19 +38,68 @@ const ChannelBar = ({
       </button>
       <span className="w-full h-10 flex items-center justify-between p-3 rounded-md text-base text-center text-gray-500">
         DIRECT MESSAGES
-        {/* <button onClick={(e) => onCreateRoom(e)}>+</button> */}
+        <button onClick={onCreateChatRoom}>+</button>
       </span>
-      {friends &&
-        friends.map((friend) => (
-          <FriendDM
-            key={friend.uid + "DM"}
-            displayName={friend.displayName}
-            photoURL={friend.photoURL}
-            onClickFriend={() => onClickFriend(friend.uid)}
+      {chatRooms &&
+        chatRooms.map((chatRoom, index) => (
+          <ChatRoom
+            key={Object.keys(chatRoom)}
+            chatRoomData={Object.values(chatRoom)}
+            currentUserData={currentUserData}
+            onClickChat={onClickChat}
           />
         ))}
       <UserBlock />
     </div>
+  );
+};
+
+const ChatRoom = ({ chatRoomData, currentUserData, onClickChat }) => {
+  const [chatMembers, setChatMembers] = useState();
+
+  const handleSetChatMembers = (chatMemberArray) => {
+    // remove the current user from the members because we do not need to display their photo or name to themself
+    if (chatMemberArray <= 1) return;
+    const filteredMembers = chatMemberArray.filter(
+      (member) => member.uid !== currentUserData.uid
+    );
+    setChatMembers(filteredMembers);
+  };
+
+  useEffect(() => {
+    const getChatMembersData = async () => {
+      const usersRef = collection(db, "users");
+      const q = query(
+        usersRef,
+        where("uid", "in", [...chatRoomData[0].members])
+      );
+      const querySnapshot = await getDocs(q);
+      let membersData = [];
+      querySnapshot.forEach((doc) => {
+        membersData = [...membersData, doc.data()];
+      });
+      handleSetChatMembers(membersData);
+    };
+    getChatMembersData();
+  }, []);
+
+  if (!chatMembers) return null;
+  return (
+    <button
+      className="w-[250px] flex align-center justify-center m-t-[auto] p-2 
+    text-gray-400 hover:bg-gray-600 rounded-md"
+      onClick={() => onClickChat(chatRoomData[0].uid)}
+    >
+      <img
+        className="rounded-full w-9"
+        src={chatMembers[0].photoURL}
+        alt="user avatar"
+      />
+      <span className="relative before:absolute before:-inset-1 before:bg-green-500 before:rounded-full w-1 h-1"></span>
+      <span className="text-white font-bold my-auto mr-auto ml-3">
+        {chatMembers[0].displayName}
+      </span>
+    </button>
   );
 };
 
@@ -101,22 +152,6 @@ const ChannelBlock = ({ channelName }) => (
     <h5 className="channel-block-text">{channelName}</h5>
   </div>
 );
-
-const FriendDM = ({ displayName, photoURL, onClickFriend }) => {
-  return (
-    <button
-      className="w-[250px] flex align-center justify-center m-t-[auto] p-2 
-    text-gray-400 hover:bg-gray-600 rounded-md"
-      onClick={onClickFriend}
-    >
-      <img className="rounded-full w-9" src={photoURL} alt="user avatar" />
-      <span className="relative before:absolute before:-inset-1 before:bg-green-500 before:rounded-full w-1 h-1"></span>
-      <span className="text-white font-bold my-auto mr-auto ml-3">
-        {displayName}
-      </span>
-    </button>
-  );
-};
 
 const UserBlock = () => {
   const { logout } = useAuthContext();

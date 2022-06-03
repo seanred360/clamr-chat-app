@@ -14,7 +14,14 @@ import {
 import { db } from "../firebaseConfig";
 import { auth } from "../firebaseConfig";
 
-const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
+const ChatMessage = ({
+  chatRoomUid,
+  messageUid,
+  displayName,
+  photoURL,
+  time,
+  content,
+}) => {
   const [showInput, setShowInput] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [reactions, setReactions] = useState();
@@ -29,14 +36,17 @@ const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
   };
 
   const handleSetReaction = async (emoji) => {
-    const docRef = doc(db, `messages/${id}/reactions/${emoji}`);
-    const docSnap = await (await getDoc(docRef)).data();
-    const payload = { ...docSnap, [auth.currentUser.displayName]: `${emoji}` };
-    await setDoc(docRef, payload);
+    const docRef = doc(db, `reactions/${messageUid}`);
+    const payload = {
+      [`${emoji}`]: {
+        [auth.currentUser.uid]: auth.currentUser.displayName,
+      },
+    };
+    await setDoc(docRef, payload, { merge: true });
   };
 
   const handleDeleteReaction = async (reaction) => {
-    const docRef = doc(db, `messages/${id}/reactions/${reaction}`);
+    const docRef = doc(db, `messages/${messageUid}/reactions/${reaction}`);
     const docSnap = await (await getDoc(docRef)).data();
     const payload = {
       ...docSnap,
@@ -47,18 +57,16 @@ const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
 
   useEffect(
     () =>
-      onSnapshot(collection(db, `messages/${id}/reactions`), (snapshot) =>
-        setReactions(
-          snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-        )
-      ),
+      onSnapshot(doc(db, `reactions/${messageUid}`), (snapshot) => {
+        setReactions(snapshot.data());
+      }),
     []
   );
 
   return (
     <div className="post group">
       <img
-        key={uuidv4()}
+        key={`avatar ${uuidv4()}`}
         src={photoURL}
         alt={`${displayName}'s avatar`}
         className="avatar"
@@ -72,7 +80,8 @@ const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
           </p>
           {showInput ? (
             <EditMessage
-              id={id}
+              chatRoomUid={chatRoomUid}
+              messageUid={messageUid}
               content={content}
               onHide={() => setShowInput(false)}
             />
@@ -86,14 +95,12 @@ const ChatMessage = ({ id, displayName, photoURL, time, content }) => {
             </>
           )}
         </div>
-        {reactions && (
-          <ReactionsGroup
-            reactions={reactions}
-            showPicker={showPicker}
-            setShowPicker={setShowPicker}
-            onEmojiSelect={handleEmojiSelect}
-          />
-        )}
+        <ReactionsGroup
+          reactions={reactions}
+          showPicker={showPicker}
+          setShowPicker={setShowPicker}
+          onEmojiSelect={handleEmojiSelect}
+        />
       </div>
       <EmojiPicker
         showPicker={showPicker}
@@ -146,22 +153,23 @@ const MessageToolbarButtons = ({
 };
 
 const ReactionsGroup = ({ reactions, showPicker, setShowPicker }) => {
-  if (!reactions[0]) return null;
+  if (!reactions) return null;
+
+  const reactionsArray = Object.entries(reactions);
+
   return (
     <div className="max-w-xs flex items-center flex-wrap">
-      {Object.keys(reactions).map((reaction, index) => (
+      {reactionsArray.map((reaction, index) => (
         <button
           key={uuidv4()}
           className="group-tooltip-emoji relative mr-2 px-1.5 py-0.5 text-sm bg-indigo-700/25 border-indigo-500 text-white border rounded-lg"
         >
-          {reactions[index].id} {Object.keys(reactions[index]).length - 1}
+          {/* {reactions[index].uid} {Object.keys(reactions[index]).length - 1} */}
+          {reaction[0]} {Object.keys(reaction[1]).length}
           <div className="group-tooltip-emoji-hover:scale-100 tooltip mb-2 left-0 flex items-center hover:bg-gray-900 cursor-default">
-            <span className="text-5xl">{reactions[index].id}</span>
+            <span className="text-5xl">{reaction[0]}</span>
             <span>
-              {(Object.keys(reactions[index]) + "")
-                .replace(/,/g, " , ")
-                .replace("id", "")
-                .slice(0, -3)}
+              {(Object.values(reaction[1]) + " ").replace(/,/g, " , ")}
             </span>
           </div>
         </button>

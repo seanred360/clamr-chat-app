@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-const EditMessage = ({ id, content, onHide }) => {
+const EditMessage = ({ chatRoomUid, messageUid, content, onHide }) => {
   const [input, setInput] = useState("");
 
   const handleCancel = (e) => {
@@ -18,7 +18,7 @@ const EditMessage = ({ id, content, onHide }) => {
 
   const handleSetDoc = async (e) => {
     e.preventDefault();
-    const docRef = doc(db, "messages", id);
+    const docRef = doc(db, `chats/${chatRoomUid}/messages/${messageUid}`);
     const payload = { content: input };
     await setDoc(docRef, payload, { merge: true });
     onHide();

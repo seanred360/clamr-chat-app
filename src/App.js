@@ -15,10 +15,12 @@ import {
   query,
   getDocs,
   updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
 import TopNavigation from "./components/TopNavigation";
 import _ from "lodash";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
   const { user } = useAuthContext();
@@ -33,45 +35,62 @@ function HomePage({ user }) {
   const [currentChannel, setCurrentChannel] = useState("friends");
   const [currentChatRoom, setCurrentChatRoom] = useState();
   const [friendsList, setFriendsList] = useState();
+  const [chatRooms, setChatRooms] = useState();
   const [currentUserData, setCurrentUserData] = useState();
 
-  const handleCreateDMRoom = async (newChatMember, newRoomUid = "") => {
-    const createDM = async () => {
+  const handleCreateChatRoom = async () => {
+    const newChatRoomUid = uuidv4();
+
+    const createChatRoom = async () => {
       // create a new chat room in the chatRooms firstore collection
-      const docRef = doc(db, "chatRooms", newRoomUid);
+      const docRef = doc(db, "chatRooms", newChatRoomUid);
       const payload = {
-        [user.uid]: true,
-        [newChatMember]: true,
+        uid: newChatRoomUid,
+        createdAt: serverTimestamp(),
+        createdBy: user.uid,
+        members: [user.uid],
+        modifiedAt: serverTimestamp(),
+        name: "Sean Red",
+        recentMessage: {
+          messageText: "",
+          readBy: {},
+          sentAt: serverTimestamp(),
+          sentBy: "",
+        },
       };
       const result = await setDoc(docRef, payload);
       console.log("created a new DM chat room");
     };
-    createDM();
+    createChatRoom();
 
-    const updateUserChatRooms = async () => {
-      // add new chatroom to the current user's chatroom list
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await (await getDoc(userDocRef)).data();
-      await updateDoc(userDocRef, {
-        chatRooms: { ...userDocSnap.chatRooms, [newRoomUid]: true },
-      });
-      console.log("updated user chatrooms");
-    };
-    updateUserChatRooms();
+    // TODO add popup window , user types friends name in
+
+    // const updateUserChatRooms = async () => {
+    //   // add new chatroom to the current user's chatroom list
+    //   const userDocRef = doc(db, "users", user.uid);
+    //   const userDocSnap = await (await getDoc(userDocRef)).data();
+    //   await updateDoc(userDocRef, {
+    //     chatRooms: { ...userDocSnap.chatRooms, [newChatRoomUid]: true },
+    //   });
+    //   console.log("updated current user chatrooms");
+
+    //   const usersRef = collection(db, "users");
+    //   const q = query(usersRef, where("uid", "in", [user.uid, newChatMember]));
+    //   const querySnapshot = await getDocs(q);
+    //   querySnapshot.forEach((doc) => {
+    //     console.log(doc.id, " => ", doc.data());
+    //     updateDoc(doc.ref, {
+    //       chatRooms: { ...doc.data().chatRooms, [newChatRoomUid]: true },
+    //     });
+    //   });
+    // };
+    // updateUserChatRooms();
   };
 
-  const handleClickFriend = (friendUid) => {
-    const directMessageUid = user.uid + friendUid;
-    if (_.has(currentUserData.chatRooms, directMessageUid)) {
-      console.log("friend DM already exists");
-      setCurrentChatRoom(directMessageUid);
-      setCurrentChannel("chatroom");
-    } else {
-      console.log("friend DM not found, creating a new room");
-      handleCreateDMRoom(friendUid, directMessageUid);
-      setCurrentChatRoom(directMessageUid);
-      setCurrentChannel("chatroom");
-    }
+  const handleEnterChatRoom = (chatRoomUid) => {
+    setCurrentChatRoom(chatRoomUid);
+    setCurrentChannel("chatroom");
+    console.log("entered chat " + chatRoomUid);
   };
 
   // get realtime updates on the firestore data about the currently logged in user
@@ -104,6 +123,21 @@ function HomePage({ user }) {
       setFriendsList(fetchedFriendsList);
     };
     getFriends();
+
+    const getChatRooms = async () => {
+      const chatRoomsRef = collection(db, "chatRooms");
+      const q = query(
+        chatRoomsRef,
+        where("members", "array-contains", user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      let newChatRooms = [];
+      querySnapshot.forEach((doc) => {
+        newChatRooms.push({ [doc.id]: doc.data() });
+      });
+      setChatRooms(newChatRooms);
+    };
+    getChatRooms();
   }, []);
 
   return (
@@ -111,14 +145,14 @@ function HomePage({ user }) {
       <SideBar />
       <ChannelBar
         currentUserData={currentUserData}
-        friends={friendsList}
-        onClickFriend={handleClickFriend}
-        onChangeChannel={(e) => setCurrentChannel("friends")}
+        chatRooms={chatRooms}
+        onClickChat={handleEnterChatRoom}
+        onCreateChatRoom={handleCreateChatRoom}
       />
       {currentChannel == "friends" ? (
         <FriendsList
           friendsList={friendsList}
-          onChangeChannel={handleClickFriend}
+          onClickFriend={handleEnterChatRoom}
         />
       ) : (
         <ChatFeed chatRoomUid={currentChatRoom} />

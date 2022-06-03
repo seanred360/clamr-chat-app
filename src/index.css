@@ -28,7 +28,7 @@ main {
   .tooltip {
     @apply absolute w-auto p-3 bottom-6 min-w-max rounded-md 
     text-white text-xs font-bold bg-gray-900 transition-all 
-    duration-100 scale-0 origin-bottom hover:bg-gray-500 hover:shadow-md z-50;
+    duration-100 scale-0 origin-bottom hover:bg-gray-500 hover:shadow-md z-[999];
   }
 
   .tooltip-left {
