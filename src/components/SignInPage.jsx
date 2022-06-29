@@ -1,4 +1,4 @@
-import { useAuthContext } from "./AuthContext";
+import { useAuthContext } from "./contexts/AuthContext";
 import { FcGoogle } from "react-icons/fc";
 import { GrFacebook, GrGithub } from "react-icons/gr";
 

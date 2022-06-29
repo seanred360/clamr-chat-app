@@ -2,7 +2,7 @@ import { useState } from "react";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { useAuthContext } from "../AuthContext";
+import { useAuthContext } from "../contexts/AuthContext";
 
 const BottomBar = ({ chatRoomUid }) => {
   const [input, setInput] = useState("");

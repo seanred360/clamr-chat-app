@@ -2,25 +2,24 @@ import SignInPage from "./components/SignInPage";
 import SideBar from "./components/SideBar";
 import ChannelBar from "./components/ChannelBar";
 import ChatFeed from "./components/chatfeed/ChatFeed";
-import { useAuthContext } from "./components/AuthContext";
+import { useAuthContext } from "./components/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import {
   collection,
-  addDoc,
   setDoc,
-  onSnapshot,
   doc,
-  getDoc,
   where,
   query,
   getDocs,
-  updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
 import TopNavigation from "./components/TopNavigation";
 import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
+import ChatRooms from "./components/friends/DirectMessages";
+import { useSelector, useDispatch } from "react-redux";
+import { changeSubChannel } from "./components/store/slices/channelSlice";
 
 function App() {
   const { user } = useAuthContext();
@@ -32,11 +31,11 @@ function App() {
 }
 
 function HomePage({ user }) {
-  const [currentChannel, setCurrentChannel] = useState("friends");
   const [currentChatRoom, setCurrentChatRoom] = useState();
-  const [friendsList, setFriendsList] = useState();
+  // const [friendsList, setFriendsList] = useState();
   const [chatRooms, setChatRooms] = useState();
-  const [currentUserData, setCurrentUserData] = useState();
+  const subChannel = useSelector((state) => state.channel.subChannel);
+  const dispatch = useDispatch();
 
   const handleCreateChatRoom = async () => {
     const newChatRoomUid = uuidv4();
@@ -57,6 +56,7 @@ function HomePage({ user }) {
           sentAt: serverTimestamp(),
           sentBy: "",
         },
+        isGroup: false,
       };
       const result = await setDoc(docRef, payload);
       console.log("created a new DM chat room");
@@ -87,42 +87,31 @@ function HomePage({ user }) {
     // updateUserChatRooms();
   };
 
-  const handleEnterChatRoom = (chatRoomUid) => {
+  const handleEnterChat = (chatRoomUid, chatRoomName) => {
     setCurrentChatRoom(chatRoomUid);
-    setCurrentChannel("chatroom");
-    console.log("entered chat " + chatRoomUid);
+    dispatch(changeSubChannel(chatRoomName));
   };
 
-  // get realtime updates on the firestore data about the currently logged in user
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
-      setCurrentUserData(doc.data());
-    });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    // const getFriends = async () => {
+    //   const docRef = doc(db, "users", user.uid);
+    //   const docSnap = await (await getDoc(docRef)).data();
+    //   const friendsList = Object.keys(docSnap.friendsList);
 
-  useEffect(() => {
-    const getFriends = async () => {
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await (await getDoc(docRef)).data();
-      const friendsList = Object.keys(docSnap.friendsList);
+    //   const q = query(
+    //     collection(db, "users"),
+    //     where("uid", "in", [...friendsList])
+    //   );
 
-      const q = query(
-        collection(db, "users"),
-        where("uid", "in", [...friendsList])
-      );
+    //   let fetchedFriendsList = [];
 
-      let fetchedFriendsList = [];
-
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        fetchedFriendsList = [...fetchedFriendsList, doc.data()];
-      });
-      setFriendsList(fetchedFriendsList);
-    };
-    getFriends();
+    //   const querySnapshot = await getDocs(q);
+    //   querySnapshot.forEach((doc) => {
+    //     fetchedFriendsList = [...fetchedFriendsList, doc.data()];
+    //   });
+    //   setFriendsList(fetchedFriendsList);
+    // };
+    // getFriends();
 
     const getChatRooms = async () => {
       const chatRoomsRef = collection(db, "chatRooms");
@@ -133,7 +122,7 @@ function HomePage({ user }) {
       const querySnapshot = await getDocs(q);
       let newChatRooms = [];
       querySnapshot.forEach((doc) => {
-        newChatRooms.push({ [doc.id]: doc.data() });
+        newChatRooms.push(doc.data());
       });
       setChatRooms(newChatRooms);
     };
@@ -144,63 +133,21 @@ function HomePage({ user }) {
     <div className="flex w-full h-screen">
       <SideBar />
       <ChannelBar
-        currentUserData={currentUserData}
-        chatRooms={chatRooms}
-        onClickChat={handleEnterChatRoom}
+        user={user}
+        chatRoomData={chatRooms}
+        onEnterChat={handleEnterChat}
         onCreateChatRoom={handleCreateChatRoom}
       />
-      {currentChannel == "friends" ? (
-        <FriendsList
-          friendsList={friendsList}
-          onClickFriend={handleEnterChatRoom}
-        />
+      {subChannel == "friends" ? (
+        <div className="content-container">
+          <TopNavigation />
+          <ChatRooms chatRoomData={chatRooms} onEnterChat={handleEnterChat} />
+        </div>
       ) : (
         <ChatFeed chatRoomUid={currentChatRoom} />
       )}
     </div>
   );
 }
-
-const FriendsList = ({ friendsList, onChangeChannel }) => {
-  if (!friendsList) return null;
-
-  return (
-    <div className="content-container">
-      <TopNavigation />
-      <ul className="content-list">
-        <li className="mr-auto mb-3 text-gray-400 font-normal text-left">
-          Online - {friendsList.length}
-        </li>
-        {friendsList.map((friend) => (
-          <li key={friend.uid} className="friendListItem">
-            <Friend
-              displayName={friend.displayName}
-              photoURL={friend.photoURL}
-              onChangeChannel={() => onChangeChannel(friend.uid)}
-              uid={friend.uid}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-const Friend = ({ displayName, photoURL, onChangeChannel }) => {
-  return (
-    <button className="friend" onClick={onChangeChannel}>
-      <img className="rounded-full w-9" src={photoURL} alt="user avatar" />
-      <span className="relative before:absolute before:-inset-1 before:bg-green-500 before:rounded-full w-1 h-1"></span>
-      <span className="flex flex-col mr-auto">
-        <span className="text-white font-bold my-auto mr-auto ml-3">
-          {displayName}
-        </span>
-        <span className="text-gray-400 font-normal my-auto mr-auto ml-3">
-          Online
-        </span>
-      </span>
-    </button>
-  );
-};
 
 export default App;
