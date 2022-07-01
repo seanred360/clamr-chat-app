@@ -3,13 +3,12 @@ import { useAuthContext } from "../contexts/AuthContext";
 import { collection, where, query, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import GroupIcon from "./GroupIcon.svg";
-import { IoConstructOutline } from "react-icons/io5";
 import { useSelector } from "react-redux/es/exports";
 
 const ChatRoom = ({ chatRoomData, onEnterChat }) => {
   const [chatMembers, setChatMembers] = useState();
   const { user } = useAuthContext();
-  const subChannel = useSelector((state) => state.channel.subChannel);
+  const channel = useSelector((state) => state.ui.channel);
 
   const setDisplayData = (chatMemberArray) => {
     // remove the current user from the members because we do not need to display their photo or name to themself
@@ -49,9 +48,7 @@ const ChatRoom = ({ chatRoomData, onEnterChat }) => {
   if (!chatMembers) return null;
   return (
     <button
-      className={`subChannelButton ${
-        subChannel == chatRoomData.name && "selected"
-      }`}
+      className={`channelButton ${channel == chatRoomData.name && "selected"}`}
       onClick={() => onEnterChat(chatRoomData.uid, chatRoomData.name)}
     >
       <img

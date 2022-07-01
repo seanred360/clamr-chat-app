@@ -6,25 +6,22 @@ import { FaUserFriends } from "react-icons/fa";
 import { IoLogoIonitron } from "react-icons/io";
 
 import { useAuthContext } from "./contexts/AuthContext";
-import DirectMessages from "./friends/DirectMessages";
-import { changeSubChannel } from "./store/slices/channelSlice";
+import DirectMessages from "./channels/DirectMessages";
+import { setChannel } from "./store/slices/uiSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 const ChannelBar = ({ chatRoomData, onEnterChat, onCreateChatRoom }) => {
   const dispatch = useDispatch();
-  const subChannel = useSelector((state) => state.channel.subChannel);
+  const channel = useSelector((state) => state.ui.channel);
 
   return (
     <div className="channel-bar shadow-lg p-2 text-white">
       <TitleBlock channelName={"Home"} />
       <FriendsListButton
-        isSelected={subChannel == "friends"}
-        onChangeSubChannel={dispatch}
+        isSelected={channel == "friends"}
+        handleClick={dispatch}
       />
-      <NitroButton
-        isSelected={subChannel == "nitro"}
-        onChangeSubChannel={dispatch}
-      />
+      <NitroButton isSelected={channel == "nitro"} handleClick={dispatch} />
       <DirectMessagesTitle onCreateChatRoom={onCreateChatRoom} />
       <DirectMessages
         chatRoomData={chatRoomData}
@@ -42,10 +39,10 @@ const TitleBlock = ({ channelName }) => (
   </div>
 );
 
-const FriendsListButton = ({ isSelected, onChangeSubChannel }) => (
+const FriendsListButton = ({ isSelected, handleClick }) => (
   <button
-    className={`subChannelButton ${isSelected && "selected"}`}
-    onClick={() => onChangeSubChannel(changeSubChannel("friends"))}
+    className={`channelButton ${isSelected && "selected"}`}
+    onClick={() => handleClick(setChannel("friends"))}
   >
     <span className="mr-3 text-xl">
       <FaUserFriends />
@@ -54,8 +51,8 @@ const FriendsListButton = ({ isSelected, onChangeSubChannel }) => (
   </button>
 );
 
-const NitroButton = ({ isSelected, onChangeSubChannel }) => (
-  <button className={`subChannelButton ${isSelected && "selected"}`}>
+const NitroButton = ({ isSelected, handleClick }) => (
+  <button className={`channelButton ${isSelected && "selected"}`}>
     <span className="mr-3 text-xl">
       <IoLogoIonitron />
     </span>
@@ -69,7 +66,9 @@ const DirectMessagesTitle = ({ onCreateChatRoom }) => (
   text-center text-zinc-400 font-medium tracking-wider text-xs uppercase hover:text-white"
   >
     Direct Messages
-    <button className="text-2xl" onClick={onCreateChatRoom}>+</button>
+    <button className="text-2xl" onClick={onCreateChatRoom}>
+      +
+    </button>
   </span>
 );
 

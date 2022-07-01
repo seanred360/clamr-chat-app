@@ -1,26 +1,30 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export const channelSlice = createSlice({
-  name: "channel",
+export const uiSlice = createSlice({
+  name: "ui",
   initialState: {
-    currentChannel: "@me",
-    subChannel: "friends",
+    server: "@me",
+    channel: "friends",
+    subChannel: "",
   },
   reducers: {
-    changeChannel: (channel, action) => {
+    setServer: (ui, action) => {
+      ui.server = action.payload;
+    },
+    setChannel: (ui, action) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       // doesn't actually mutate the state because it uses the Immer library,
       // which detects changes to a "draft state" and produces a brand new
       // immutable state based off those changes
-      channel.currentChannel = action.payload;
+      ui.channel = action.payload;
     },
-    changeSubChannel: (channel, action) => {
-      channel.subChannel = action.payload;
+    setSubChannel: (ui, action) => {
+      ui.subChannel = action.payload;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { changeChannel, changeSubChannel } = channelSlice.actions;
+export const { setServer, setChannel, setSubChannel } = uiSlice.actions;
 
-export default channelSlice.reducer;
+export default uiSlice.reducer;

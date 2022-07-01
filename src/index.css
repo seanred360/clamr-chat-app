@@ -17,13 +17,13 @@ main {
 }
 
 @layer components {
-  .subChannelButton {
+  .channelButton {
     @apply w-full flex items-center my-1 p-2 
-    text-zinc-400 rounded text-base text-center hover:bg-zinc-600 hover:text-white;
+    text-zinc-400 rounded text-base text-center hover:bg-zinc-700 hover:text-white;
   }
 
-  .subChannelButton.selected {
-    @apply bg-zinc-600 text-white hover:bg-zinc-700;
+  .channelButton.selected {
+    @apply bg-zinc-700 text-white hover:opacity-80;
   }
 
   .ellipsis {
@@ -69,7 +69,7 @@ main {
     bg-gray-300 dark:bg-gray-700 bg-opacity-90 
     w-full h-16 
     m-0 
-    shadow-lg;
+    shadow-lg border-b-[1px] border-zinc-800;
   }
 
   .top-navigation-icon {
@@ -137,8 +137,12 @@ main {
   }
 
   .friendsToolbarButton {
-    @apply mx-3 p-1 rounded-md hover:bg-gray-600/50
+    @apply mx-3 p-1 rounded-md hover:bg-gray-600/50 hover:text-white
     text-gray-400 text-sm tracking-wide;
+  }
+
+  .friendsToolbarButton.selected {
+    @apply bg-gray-500/50 text-white cursor-default hover:bg-gray-600/50;
   }
 
   .post {

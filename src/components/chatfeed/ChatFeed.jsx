@@ -1,9 +1,9 @@
-import TopNavigation from "../TopNavigation";
+// import TopNavigation from "../TopNavigation";
 import BottomBar from "./BottomBar";
 import ChatMessage from "./ChatMessage";
 import { useEffect, useState } from "react";
 import { db } from "../firebaseConfig";
-import { onSnapshot, collection, doc } from "firebase/firestore";
+import { onSnapshot, collection } from "firebase/firestore";
 
 const ChatFeed = ({ chatRoomUid }) => {
   const [messages, setMessages] = useState([
@@ -26,7 +26,7 @@ const ChatFeed = ({ chatRoomUid }) => {
 
   return (
     <div className="content-container">
-      <TopNavigation />
+      {/* <TopNavigation /> */}
       <div className="content-list z-10">
         {/* TODO order messages by date */}
         {messages.map((message) => (

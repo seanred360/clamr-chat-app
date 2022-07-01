@@ -12,14 +12,16 @@ import {
   query,
   getDocs,
   serverTimestamp,
+  updateDoc,
+  arrayUnion,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
 import TopNavigation from "./components/TopNavigation";
-import _ from "lodash";
+// import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
-import ChatRooms from "./components/friends/DirectMessages";
+import Friends from "./components/channels/friends/Friends";
 import { useSelector, useDispatch } from "react-redux";
-import { changeSubChannel } from "./components/store/slices/channelSlice";
+import { setChannel } from "./components/store/slices/uiSlice";
 
 function App() {
   const { user } = useAuthContext();
@@ -34,7 +36,7 @@ function HomePage({ user }) {
   const [currentChatRoom, setCurrentChatRoom] = useState();
   // const [friendsList, setFriendsList] = useState();
   const [chatRooms, setChatRooms] = useState();
-  const subChannel = useSelector((state) => state.channel.subChannel);
+  const channel = useSelector((state) => state.ui.channel);
   const dispatch = useDispatch();
 
   const handleCreateChatRoom = async () => {
@@ -89,7 +91,47 @@ function HomePage({ user }) {
 
   const handleEnterChat = (chatRoomUid, chatRoomName) => {
     setCurrentChatRoom(chatRoomUid);
-    dispatch(changeSubChannel(chatRoomName));
+    dispatch(setChannel(chatRoomName));
+  };
+
+  const handleAddFriend = async (newFriend) => {
+    const splitFriend = newFriend.trim().split("#");
+    const friendName = splitFriend[0];
+    const friendDiscriminator = `#${splitFriend[1]}`;
+    const success = {
+      error: false,
+      message: `Success! Your friend request to ${newFriend} was sent`,
+    };
+    const error = {
+      error: true,
+      message:
+        "Hm, didn't work. Double check that the capitalization, spelling, any spaces, and numbers are correct.",
+    };
+
+    const nameQuery = query(
+      collection(db, "users"),
+      where("displayName", "==", friendName)
+    );
+
+    const querySnapshot = await getDocs(nameQuery);
+    if (querySnapshot.empty) {
+      return error;
+    }
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.discriminator === friendDiscriminator) {
+        addFriend(data.uid);
+      }
+    });
+
+    async function addFriend(uid) {
+      const docRef = doc(db, "users", user.uid);
+      const payload = {
+        friendRequests: arrayUnion(uid),
+      };
+      await updateDoc(docRef, payload);
+    }
+    return success;
   };
 
   useEffect(() => {
@@ -138,14 +180,20 @@ function HomePage({ user }) {
         onEnterChat={handleEnterChat}
         onCreateChatRoom={handleCreateChatRoom}
       />
-      {subChannel == "friends" ? (
-        <div className="content-container">
-          <TopNavigation />
-          <ChatRooms chatRoomData={chatRooms} onEnterChat={handleEnterChat} />
-        </div>
-      ) : (
-        <ChatFeed chatRoomUid={currentChatRoom} />
-      )}
+      <div className="content-container">
+        <TopNavigation onAddFriend={handleAddFriend} />
+        {channel == "friends" ? (
+          <div className="content-container">
+            <Friends
+              chatRoomData={chatRooms}
+              onEnterChat={handleEnterChat}
+              onAddFriend={handleAddFriend}
+            />
+          </div>
+        ) : (
+          <ChatFeed chatRoomUid={currentChatRoom} />
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import {
   FaSearch,
-  FaHashtag,
   FaRegBell,
   FaUserCircle,
   FaMoon,
@@ -9,18 +8,19 @@ import {
 import useDarkMode from "./hooks/useDarkMode";
 import { FaUserFriends } from "react-icons/fa";
 import { MdOutlineAlternateEmail } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
+import { setSubChannel } from "./store/slices/uiSlice";
 
-const TopNavigation = () => {
-  const subChannel = useSelector((state) => state.channel.subChannel);
+const TopNavigation = ({ onAddFriend }) => {
+  const channel = useSelector((state) => state.ui.channel);
 
   return (
     <div className="top-navigation">
-      {/* <TitleIcon /> */}
-      {/* <Title title={subChannel} /> */}
       <ChannelToolbar
-        icon={subChannel == "friends" ? <FriendsIcon /> : <ChatRoomIcon />}
-        title={subChannel}
+        icon={channel == "friends" ? <FriendsIcon /> : <ChatRoomIcon />}
+        title={channel}
+        onAddFriend={onAddFriend}
       />
       <ThemeIcon />
       <Search />
@@ -31,37 +31,55 @@ const TopNavigation = () => {
 };
 
 const ChannelToolbar = ({ icon, title }) => {
+  const [selected, setSelected] = useState();
+  const dispatch = useDispatch();
+
+  const handleClick = (selectedButton) => {
+    setSelected(selectedButton);
+    dispatch(setSubChannel(selectedButton));
+  };
+
   return (
     <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
       <span className="mr-3 text-xl text-gray-500">{icon}</span>
       <span className="ellipsis pr-3 border-r-[1px] border-gray-600 font-bold tracking-wide capitalize">
         {title}
       </span>
-      <button className="friendsToolbarButton">Online</button>
-      <button className="friendsToolbarButton">All</button>
-      <button className="friendsToolbarButton">Pending</button>
-      <button className="friendsToolbarButton">Blocked</button>
-      <button className="friendsToolbarButton text-green-600">
-        Add Friend
+      <button
+        onClick={() => handleClick("online")}
+        className={`friendsToolbarButton  ${
+          selected == "online" && "selected"
+        }`}
+      >
+        Online
       </button>
-    </div>
-  );
-};
-
-const FriendsToolbar = () => {
-  return (
-    <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
-      <span className="mr-3 text-xl text-gray-500">
-        <FaUserFriends />
-      </span>
-      <span className="pr-3 border-r-[1px] border-gray-600 font-bold tracking-wide">
-        Friends
-      </span>
-      <button className="friendsToolbarButton">Online</button>
-      <button className="friendsToolbarButton">All</button>
-      <button className="friendsToolbarButton">Pending</button>
-      <button className="friendsToolbarButton">Blocked</button>
-      <button className="friendsToolbarButton text-green-600">
+      <button
+        onClick={() => handleClick("all")}
+        className={`friendsToolbarButton  ${selected == "all" && "selected"}`}
+      >
+        All
+      </button>
+      <button
+        onClick={() => handleClick("pending")}
+        className={`friendsToolbarButton  ${
+          selected == "pending" && "selected"
+        }`}
+      >
+        Pending
+      </button>
+      <button
+        onClick={() => handleClick("blocked")}
+        className={`friendsToolbarButton  ${
+          selected == "blocked" && "selected"
+        }`}
+      >
+        Blocked
+      </button>
+      <button
+        onClick={() => handleClick("add friend")}
+        className={`friendsToolbarButton friendsToolbarButton bg-green-600 text-white 
+      ${selected == "add friend" && "selected"}`}
+      >
         Add Friend
       </button>
     </div>
