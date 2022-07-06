@@ -5,12 +5,16 @@ import {
   FaMoon,
   FaSun,
 } from "react-icons/fa";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 import useDarkMode from "./hooks/useDarkMode";
 import { FaUserFriends } from "react-icons/fa";
 import { MdOutlineAlternateEmail } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { setSubChannel } from "./store/slices/uiSlice";
+import { useEffect } from "react";
+import { useAuthContext } from "./contexts/AuthContext";
 
 const TopNavigation = ({ onAddFriend }) => {
   const channel = useSelector((state) => state.ui.channel);
@@ -31,6 +35,8 @@ const TopNavigation = ({ onAddFriend }) => {
 };
 
 const ChannelToolbar = ({ icon, title }) => {
+  const { user } = useAuthContext();
+  const [pendingCount, setPendingCount] = useState();
   const [selected, setSelected] = useState();
   const dispatch = useDispatch();
 
@@ -38,6 +44,13 @@ const ChannelToolbar = ({ icon, title }) => {
     setSelected(selectedButton);
     dispatch(setSubChannel(selectedButton));
   };
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      setPendingCount(doc.data().incomingFriendRequests.length);
+    });
+    return unsub;
+  }, [user]);
 
   return (
     <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
@@ -65,7 +78,12 @@ const ChannelToolbar = ({ icon, title }) => {
           selected == "pending" && "selected"
         }`}
       >
-        Pending
+        Pending{" "}
+        {pendingCount > 0 && (
+          <span className="min-w-[16px] min-h-[16px] rounded-full bg-red-500 text-xs ml-1">
+            {pendingCount}
+          </span>
+        )}
       </button>
       <button
         onClick={() => handleClick("blocked")}
