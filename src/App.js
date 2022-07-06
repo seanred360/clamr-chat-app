@@ -25,6 +25,7 @@ import { setChannel } from "./components/store/slices/uiSlice";
 
 function App() {
   const { user } = useAuthContext();
+
   return (
     <main className="flex items-center justify-center bg-gray-500 p-6 md:p-0">
       {user ? <HomePage user={user} /> : <SignInPage />}
@@ -34,7 +35,6 @@ function App() {
 
 function HomePage({ user }) {
   const [currentChatRoom, setCurrentChatRoom] = useState();
-  // const [friendsList, setFriendsList] = useState();
   const [chatRooms, setChatRooms] = useState();
   const channel = useSelector((state) => state.ui.channel);
   const dispatch = useDispatch();
@@ -124,12 +124,17 @@ function HomePage({ user }) {
       }
     });
 
-    async function addFriend(uid) {
-      const docRef = doc(db, "users", user.uid);
-      const payload = {
-        friendRequests: arrayUnion(uid),
+    async function addFriend(friendUid) {
+      const userRef = doc(db, "users", user.uid);
+      const friendRef = doc(db, "users", friendUid);
+      const outgoingPayload = {
+        outgoingFriendRequests: arrayUnion(friendUid),
       };
-      await updateDoc(docRef, payload);
+      const incomingPayload = {
+        incomingFriendRequests: arrayUnion(user.uid),
+      };
+      await updateDoc(userRef, outgoingPayload);
+      await updateDoc(friendRef, incomingPayload);
     }
     return success;
   };

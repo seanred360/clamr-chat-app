@@ -1,6 +1,9 @@
 // import { useState } from "react";
 // import { BsHash } from "react-icons/bs";
 // import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FaUserFriends } from "react-icons/fa";
 import { IoLogoIonitron } from "react-icons/io";
@@ -39,17 +42,34 @@ const TitleBlock = ({ channelName }) => (
   </div>
 );
 
-const FriendsListButton = ({ isSelected, handleClick }) => (
-  <button
-    className={`channelButton ${isSelected && "selected"}`}
-    onClick={() => handleClick(setChannel("friends"))}
-  >
-    <span className="mr-3 text-xl">
-      <FaUserFriends />
-    </span>
-    <span>Friends</span>
-  </button>
-);
+const FriendsListButton = ({ isSelected, handleClick }) => {
+  const { user } = useAuthContext();
+  const [pendingCount, setPendingCount] = useState();
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      setPendingCount(doc.data().incomingFriendRequests.length);
+    });
+    return unsub;
+  }, [user]);
+
+  return (
+    <button
+      className={`channelButton ${isSelected && "selected"}`}
+      onClick={() => handleClick(setChannel("friends"))}
+    >
+      <span className="mr-3 text-xl">
+        <FaUserFriends />
+      </span>
+      <span>Friends</span>
+      {pendingCount > 0 && (
+        <span className="min-w-[16px] min-h-[16px] ml-auto rounded-full bg-red-500 text-xs">
+          {pendingCount}
+        </span>
+      )}
+    </button>
+  );
+};
 
 const NitroButton = ({ isSelected, handleClick }) => (
   <button className={`channelButton ${isSelected && "selected"}`}>
