@@ -1,29 +1,34 @@
 import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
-import ChatRoom from "../ChatRoom";
-import {
-  AiOutlineSearch,
-  AiOutlineClose,
-  AiOutlineCheck,
-} from "react-icons/ai";
-import { useRef } from "react";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { useState, useEffect, useRef } from "react";
+import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 import {
   collection,
   doc,
   where,
   query,
   getDocs,
-  getDoc,
+  updateDoc,
+  arrayRemove,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import ChatRoom from "../ChatRoom";
 
-const Friends = ({ chatRoomData, onEnterChat, onAddFriend }) => {
+const Friends = ({ chatRoomData, onEnterChat, onAddFriend, user }) => {
   const subChannel = useSelector((state) => state.ui.subChannel);
+  const [userSnapshot, setUserSnapshot] = useState();
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      setUserSnapshot(doc.data());
+    });
+    return unsub;
+  }, [user]);
 
   if (subChannel === "add friend")
     return <AddFriend onAddFriend={onAddFriend} />;
-  if (subChannel === "pending") return <FriendRequestsList />;
+  if (subChannel === "pending")
+    return <FriendRequestsList userSnapshot={userSnapshot} user={user} />;
   return <FriendsList chatRoomData={chatRoomData} onEnterChat={onEnterChat} />;
 };
 
@@ -63,6 +68,7 @@ const Friends = ({ chatRoomData, onEnterChat, onAddFriend }) => {
 // };
 
 const AddFriend = ({ onAddFriend }) => {
+  const [input, setInput] = useState();
   const [isTyping, setIsTyping] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [status, setStatus] = useState({ error: false, message: "" });
@@ -123,16 +129,14 @@ const AddFriend = ({ onAddFriend }) => {
   );
 };
 
-const FriendRequestsList = () => {
-  const { user } = useAuthContext();
+const FriendRequestsList = ({ userSnapshot, user }) => {
+  const userDocRef = doc(db, "users", user.uid);
   const [incomingFriendRequests, setIncomingFriendRequests] = useState();
   const [outgoingFriendRequests, setOutgoingFriendRequests] = useState();
 
   useEffect(() => {
     const getFriendRequests = async (type, stateSetter) => {
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await (await getDoc(docRef)).data();
-      const pendingRequests = docSnap[type];
+      const pendingRequests = userSnapshot[type];
 
       if (pendingRequests && pendingRequests.length > 0) {
         const q = query(
@@ -151,13 +155,43 @@ const FriendRequestsList = () => {
     };
     getFriendRequests("incomingFriendRequests", setIncomingFriendRequests);
     getFriendRequests("outgoingFriendRequests", setOutgoingFriendRequests);
-  }, [user]);
+
+    return getFriendRequests;
+  }, [userSnapshot]);
 
   const getPendingCount = () => {
     let count = 0;
     if (incomingFriendRequests) count += incomingFriendRequests.length;
     if (outgoingFriendRequests) count += outgoingFriendRequests.length;
     return count;
+  };
+
+  const handleAcceptRequest = () => {
+    console.log("accept request");
+  };
+
+  const handleDeclineRequest = async (type, requestUid) => {
+    // remove request from current user's list
+    await updateDoc(userDocRef, { [type]: arrayRemove(requestUid) });
+    // remove request from our local state
+    setIncomingFriendRequests(
+      incomingFriendRequests.filter(
+        (request) => request[type].indexOf(requestUid) === 0
+      )
+    );
+
+    // remove request from declined user's list
+    const declinedUserDocRef = doc(db, "users", requestUid);
+    if (type === "incomingFriendRequests") {
+      await updateDoc(declinedUserDocRef, {
+        outgoingFriendRequests: arrayRemove(user.uid),
+      });
+    }
+    if (type === "outgoingFriendRequests") {
+      await updateDoc(declinedUserDocRef, {
+        incomingFriendRequests: arrayRemove(user.uid),
+      });
+    }
   };
 
   if (!incomingFriendRequests && !outgoingFriendRequests)
@@ -173,7 +207,9 @@ const FriendRequestsList = () => {
           <FriendRequest
             key={`pending request ${request.uid}`}
             user={request}
-            type={"incoming"}
+            type={"incomingFriendRequests"}
+            onAccept={handleAcceptRequest}
+            onDecline={handleDeclineRequest}
           />
         ))}
       {outgoingFriendRequests &&
@@ -181,14 +217,15 @@ const FriendRequestsList = () => {
           <FriendRequest
             key={`pending request ${request.uid}`}
             user={request}
-            type={"outgoing"}
+            type={"outgoingFriendRequests"}
+            onDecline={handleDeclineRequest}
           />
         ))}
     </div>
   );
 };
 
-const FriendRequest = ({ user, type }) => {
+const FriendRequest = ({ user, type, onAccept, onDecline }) => {
   return (
     <div className="flex w-full items-center p-3 border-b-[1px] border-zinc-600 hover:bg-zinc-600 hover:rounded-md group">
       <img
@@ -203,14 +240,22 @@ const FriendRequest = ({ user, type }) => {
           {user.discriminator}
         </span>
         <br />
-        <span className="capitalize text-zinc-300 text-xs">{`${type} friend request`}</span>
+        <span className="capitalize text-zinc-300 text-xs">{`${
+          type === "incomingFriendRequests" ? "incoming" : "outgoing"
+        } friend request`}</span>
       </p>
-      {type === "incoming" && (
-        <button className="bg-zinc-800/75 rounded-full p-2 text-white hover:text-green-500 group-hover:bg-zinc-900">
+      {type === "incomingFriendRequests" && (
+        <button
+          className="bg-zinc-800/75 rounded-full p-2 text-white hover:text-green-500 group-hover:bg-zinc-900"
+          onClick={onAccept}
+        >
           <AiOutlineCheck />
         </button>
       )}
-      <button className="bg-zinc-800/75 rounded-full ml-3 p-2 text-white hover:text-red-500 group-hover:bg-zinc-900">
+      <button
+        className="bg-zinc-800/75 rounded-full ml-3 p-2 text-white hover:text-red-500 group-hover:bg-zinc-900"
+        onClick={() => onDecline(type, user.uid)}
+      >
         <AiOutlineClose />
       </button>
     </div>

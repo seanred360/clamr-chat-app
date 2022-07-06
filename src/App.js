@@ -1,7 +1,3 @@
-import SignInPage from "./components/SignInPage";
-import SideBar from "./components/SideBar";
-import ChannelBar from "./components/ChannelBar";
-import ChatFeed from "./components/chatfeed/ChatFeed";
 import { useAuthContext } from "./components/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import {
@@ -16,12 +12,15 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
-import TopNavigation from "./components/TopNavigation";
-// import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
-import Friends from "./components/channels/friends/Friends";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "./components/store/slices/uiSlice";
+import TopNavigation from "./components/TopNavigation";
+import SignInPage from "./components/SignInPage";
+import SideBar from "./components/SideBar";
+import ChannelBar from "./components/ChannelBar";
+import ChatFeed from "./components/chatfeed/ChatFeed";
+import Friends from "./components/channels/friends/Friends";
 
 function App() {
   const { user } = useAuthContext();
@@ -140,26 +139,6 @@ function HomePage({ user }) {
   };
 
   useEffect(() => {
-    // const getFriends = async () => {
-    //   const docRef = doc(db, "users", user.uid);
-    //   const docSnap = await (await getDoc(docRef)).data();
-    //   const friendsList = Object.keys(docSnap.friendsList);
-
-    //   const q = query(
-    //     collection(db, "users"),
-    //     where("uid", "in", [...friendsList])
-    //   );
-
-    //   let fetchedFriendsList = [];
-
-    //   const querySnapshot = await getDocs(q);
-    //   querySnapshot.forEach((doc) => {
-    //     fetchedFriendsList = [...fetchedFriendsList, doc.data()];
-    //   });
-    //   setFriendsList(fetchedFriendsList);
-    // };
-    // getFriends();
-
     const getChatRooms = async () => {
       const chatRoomsRef = collection(db, "chatRooms");
       const q = query(
@@ -193,6 +172,7 @@ function HomePage({ user }) {
               chatRoomData={chatRooms}
               onEnterChat={handleEnterChat}
               onAddFriend={handleAddFriend}
+              user={user}
             />
           </div>
         ) : (

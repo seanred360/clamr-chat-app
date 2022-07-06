@@ -46,6 +46,7 @@ const ChannelToolbar = ({ icon, title }) => {
   };
 
   useEffect(() => {
+    // subscribe to the current user's incoming friend requests
     const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
       setPendingCount(doc.data().incomingFriendRequests.length);
     });
