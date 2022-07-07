@@ -10,6 +10,7 @@ import {
   updateDoc,
   arrayRemove,
   onSnapshot,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import ChatRoom from "../ChatRoom";
@@ -68,7 +69,6 @@ const Friends = ({ chatRoomData, onEnterChat, onAddFriend, user }) => {
 // };
 
 const AddFriend = ({ onAddFriend }) => {
-  const [input, setInput] = useState();
   const [isTyping, setIsTyping] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [status, setStatus] = useState({ error: false, message: "" });
@@ -130,7 +130,9 @@ const AddFriend = ({ onAddFriend }) => {
 };
 
 const FriendRequestsList = ({ userSnapshot, user }) => {
+  // the path in the database to find the current user
   const userDocRef = doc(db, "users", user.uid);
+  // an array of user objects with user data
   const [incomingFriendRequests, setIncomingFriendRequests] = useState();
   const [outgoingFriendRequests, setOutgoingFriendRequests] = useState();
 
@@ -166,22 +168,37 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
     return count;
   };
 
-  const handleAcceptRequest = () => {
-    console.log("accept request");
+  const handleAcceptRequest = async (requestUid) => {
+    // remove request from current user's list and add to friends list
+    await updateDoc(userDocRef, {
+      incomingFriendRequests: arrayRemove(requestUid),
+      friendsList: { ...userSnapshot.friendsList, [requestUid]: true },
+    });
+
+    // the database path to find the request user
+    const requestUserDocRef = doc(db, "users", requestUid);
+    // get a copy of the old data so we can push it into the new data
+    const requestDocSnap = (await getDoc(requestUserDocRef)).data();
+    // remove request from request users list and add to friends list
+    await updateDoc(requestUserDocRef, {
+      outgoingFriendRequests: arrayRemove(user.uid),
+      friendsList: { ...requestDocSnap.friendsList, [user.uid]: true },
+    });
+    // remove request from our local state
+    setIncomingFriendRequests(
+      incomingFriendRequests.filter(
+        (request) => request.incomingFriendRequests.indexOf(requestUid) === 0
+      )
+    );
   };
 
   const handleDeclineRequest = async (type, requestUid) => {
     // remove request from current user's list
     await updateDoc(userDocRef, { [type]: arrayRemove(requestUid) });
-    // remove request from our local state
-    setIncomingFriendRequests(
-      incomingFriendRequests.filter(
-        (request) => request[type].indexOf(requestUid) === 0
-      )
-    );
 
-    // remove request from declined user's list
+    // the database path to find the declined user
     const declinedUserDocRef = doc(db, "users", requestUid);
+    // remove request from declined user's list
     if (type === "incomingFriendRequests") {
       await updateDoc(declinedUserDocRef, {
         outgoingFriendRequests: arrayRemove(user.uid),
@@ -192,10 +209,25 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
         incomingFriendRequests: arrayRemove(user.uid),
       });
     }
+
+    // remove request from our local state
+    if (type === "incomingFriendRequests") {
+      const remove = incomingFriendRequests.filter(
+        (request) => request[type].indexOf(requestUid) === 0
+      );
+      setIncomingFriendRequests(remove);
+    }
+    if (type === "outgoingFriendRequests") {
+      const remove = outgoingFriendRequests.filter(
+        (request) => request[type].indexOf(requestUid) === 0
+      );
+      setOutgoingFriendRequests(remove);
+    }
+
+    // setIncomingFriendRequests(remove);
   };
 
-  if (!incomingFriendRequests && !outgoingFriendRequests)
-    return <h1>no requests</h1>;
+  if (!incomingFriendRequests && !outgoingFriendRequests) return null;
 
   return (
     <div className="flex flex-col items-start justify-center p-6">
@@ -247,7 +279,7 @@ const FriendRequest = ({ user, type, onAccept, onDecline }) => {
       {type === "incomingFriendRequests" && (
         <button
           className="bg-zinc-800/75 rounded-full p-2 text-white hover:text-green-500 group-hover:bg-zinc-900"
-          onClick={onAccept}
+          onClick={() => onAccept(user.uid)}
         >
           <AiOutlineCheck />
         </button>
