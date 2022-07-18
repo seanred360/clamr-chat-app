@@ -13,15 +13,20 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import ChatRoom from "../ChatRoom";
-import { setChannel } from "../../store/slices/uiSlice";
+import { selectSubChannel, setChannel } from "../../store/slices/uiSlice";
 
-const Friends = ({ onAddFriend, userData }) => {
-  const subChannel = useSelector((state) => state.ui.subChannel);
+const Friends = ({ onSendRequest, onCreateChatRoom, userData }) => {
+  const subChannel = useSelector(selectSubChannel);
 
   if (subChannel === "add friend")
-    return <SendFriendRequest onAddFriend={onAddFriend} />;
+    return <SendFriendRequest onSendRequest={onSendRequest} />;
   if (subChannel === "pending")
-    return <FriendRequestsList userData={userData} />;
+    return (
+      <FriendRequestsList
+        userData={userData}
+        onCreateChatRoom={onCreateChatRoom}
+      />
+    );
   return <FriendsList friendChatData={userData.friendChatData} />;
 };
 
@@ -60,7 +65,7 @@ const Friends = ({ onAddFriend, userData }) => {
 //   );
 // };
 
-const SendFriendRequest = ({ onAddFriend }) => {
+const SendFriendRequest = ({ onSendRequest }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [status, setStatus] = useState({ error: false, message: "" });
@@ -68,7 +73,7 @@ const SendFriendRequest = ({ onAddFriend }) => {
 
   const handleClick = async (e) => {
     e.preventDefault();
-    const result = await onAddFriend(searchRef.current.value);
+    const result = await onSendRequest(searchRef.current.value);
     setStatus(result);
     setHasSubmitted(true);
     searchRef.current.value = "";
@@ -121,7 +126,7 @@ const SendFriendRequest = ({ onAddFriend }) => {
   );
 };
 
-const FriendRequestsList = ({ userData }) => {
+const FriendRequestsList = ({ userData, onCreateChatRoom }) => {
   // the path in the database to find the current user
   const userDocRef = doc(db, "users", userData.uid);
   // an array of user objects with user data
@@ -129,6 +134,7 @@ const FriendRequestsList = ({ userData }) => {
   const [outgoingFriendRequests, setOutgoingFriendRequests] = useState();
 
   useEffect(() => {
+    // get the user data of the incoming or outgoing friend request
     const getFriendRequests = async (type, stateSetter) => {
       const pendingRequests = userData[type];
 
@@ -150,7 +156,7 @@ const FriendRequestsList = ({ userData }) => {
     getFriendRequests("incomingFriendRequests", setIncomingFriendRequests);
     getFriendRequests("outgoingFriendRequests", setOutgoingFriendRequests);
 
-    return getFriendRequests;
+    return () => getFriendRequests();
   }, [userData]);
 
   const getPendingCount = () => {
@@ -182,6 +188,8 @@ const FriendRequestsList = ({ userData }) => {
         (request) => request.incomingFriendRequests.indexOf(requestUid) === 0
       )
     );
+
+    onCreateChatRoom([userData, requestDocSnap]);
   };
 
   const handleDeclineRequest = async (type, requestUid) => {

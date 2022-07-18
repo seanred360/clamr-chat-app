@@ -37,9 +37,9 @@ const ChannelToolbar = ({ pendingCount, icon, title }) => {
   const [selected, setSelected] = useState("all");
   const dispatch = useDispatch();
 
-  const handleClick = (selectedButton) => {
-    setSelected(selectedButton);
-    dispatch(setSubChannel(selectedButton));
+  const handleClick = (subChannel) => {
+    setSelected(subChannel);
+    dispatch(setSubChannel(subChannel));
   };
 
   return (

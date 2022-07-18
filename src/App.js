@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   collection,
   setDoc,
@@ -9,11 +8,11 @@ import {
   serverTimestamp,
   updateDoc,
   arrayUnion,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { useSelector, useDispatch } from "react-redux";
-import { setChannel } from "./components/store/slices/uiSlice";
 import { selectUser } from "./components/store/slices/authSlice";
 
 import TopNavigation from "./components/TopNavigation";
@@ -23,6 +22,7 @@ import ChatFeed from "./components/chatfeed/ChatFeed";
 import Friends from "./components/channels/friends/Friends";
 import LoginPage from "./components/LoginPage";
 import { selectUserData } from "./components/store/slices/userDataSlice";
+import { selectChannel } from "./components/store/slices/uiSlice";
 
 function App() {
   const currentUser = useSelector(selectUser);
@@ -36,22 +36,24 @@ function App() {
 
 function HomePage() {
   const userData = useSelector(selectUserData);
-  const channel = useSelector((state) => state.ui.channel);
-  const dispatch = useDispatch();
+  const channel = useSelector(selectChannel);
 
-  const handleCreateChatRoom = async () => {
+  const handleCreateChatRoom = async (chatMembers) => {
     const newChatRoomUid = uuidv4();
 
-    const createChatRoom = async () => {
+    const createChatRoom = async (chatMembers) => {
       // create a new chat room in the chatRooms firstore collection
+      const memberUids = chatMembers.map((member) => member.uid);
+      const memberNames = chatMembers.map((member) => member.displayName);
+
       const docRef = doc(db, "chatRooms", newChatRoomUid);
       const payload = {
         uid: newChatRoomUid,
         createdAt: serverTimestamp(),
         createdBy: userData.uid,
-        members: [userData.uid],
+        members: memberUids,
         modifiedAt: serverTimestamp(),
-        name: "Sean Red",
+        name: memberNames,
         recentMessage: {
           messageText: "",
           readBy: {},
@@ -63,7 +65,7 @@ function HomePage() {
       const result = await setDoc(docRef, payload);
       console.log("created a new DM chat room");
     };
-    createChatRoom();
+    createChatRoom(chatMembers);
 
     // TODO add popup window , user types friends name in
 
@@ -113,9 +115,9 @@ function HomePage() {
       return error;
     }
     querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.discriminator === friendDiscriminator) {
-        sendRequest(data.uid);
+      const requestData = doc.data();
+      if (requestData.discriminator === friendDiscriminator) {
+        sendRequest(requestData.uid);
       }
     });
 
@@ -123,14 +125,14 @@ function HomePage() {
       // update each users requests list on the database
       const userRef = doc(db, "users", userData.uid);
       const friendRef = doc(db, "users", friendUid);
-      const outgoingPayload = {
+      const payloadForUser = {
         outgoingFriendRequests: arrayUnion(friendUid),
       };
-      const incomingPayload = {
+      const payloadForFriend = {
         incomingFriendRequests: arrayUnion(userData.uid),
       };
-      await updateDoc(userRef, outgoingPayload);
-      await updateDoc(friendRef, incomingPayload);
+      await updateDoc(userRef, payloadForUser);
+      await updateDoc(friendRef, payloadForFriend);
     }
     return success;
   };
@@ -140,10 +142,14 @@ function HomePage() {
       <SideBar />
       <ChannelBar onCreateChatRoom={handleCreateChatRoom} />
       <div className="content-container">
-        <TopNavigation onsendRequest={handleSendFriendRequest} />
+        <TopNavigation onSendRequest={handleSendFriendRequest} />
         {channel == "friends" ? (
           <div className="content-container">
-            <Friends onsendRequest={handleSendFriendRequest} userData={userData} />
+            <Friends
+              onSendRequest={handleSendFriendRequest}
+              onCreateChatRoom={handleCreateChatRoom}
+              userData={userData}
+            />
           </div>
         ) : (
           <ChatFeed />

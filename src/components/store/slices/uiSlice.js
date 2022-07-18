@@ -24,5 +24,6 @@ export const uiSlice = createSlice({
 export const { setServer, setChannel, setSubChannel } = uiSlice.actions;
 
 export const selectChannel = (state) => state.ui.channel;
+export const selectSubChannel = (state) => state.ui.subChannel;
 
 export default uiSlice.reducer;
