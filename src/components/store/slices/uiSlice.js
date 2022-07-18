@@ -12,10 +12,6 @@ export const uiSlice = createSlice({
       ui.server = action.payload;
     },
     setChannel: (ui, action) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
       ui.channel = action.payload;
     },
     setSubChannel: (ui, action) => {
@@ -26,5 +22,7 @@ export const uiSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const { setServer, setChannel, setSubChannel } = uiSlice.actions;
+
+export const selectChannel = (state) => state.ui.channel;
 
 export default uiSlice.reducer;

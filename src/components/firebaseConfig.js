@@ -1,6 +1,76 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  GithubAuthProvider,
+  TwitterAuthProvider,
+  OAuthProvider,
+  signInAnonymously,
+  getAuth,
+  signOut,
+  updateProfile,
+  onAuthStateChanged,
+} from "firebase/auth";
+
+export const SignInWithGoogle = () => {
+  const provider = new GoogleAuthProvider();
+
+  const login = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  return login();
+};
+
+export const SignInWithFacebook = () => {
+  const provider = new FacebookAuthProvider();
+
+  const login = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  return login();
+};
+
+export const SignInWithGithub = () => {
+  const provider = new GithubAuthProvider();
+
+  const login = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  return login();
+};
+
+export const Logout = () => {
+  signOut(auth)
+    .then(() => {
+      console.log("sign out success");
+    })
+    .catch((error) => {
+      console.log("sign out failed");
+    });
+};
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_1QrTMmDxVFONadfSmDk4GQx42NCFr_o",
@@ -16,8 +86,4 @@ const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
 export const auth = getAuth(firebaseApp);
-export { firebaseApp, db };
-
-// export const auth = getAuth(app);
-// export const auth = app.auth();
-// export default app;
+export { firebaseApp, db, onAuthStateChanged };

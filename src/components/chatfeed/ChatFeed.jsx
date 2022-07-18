@@ -4,11 +4,14 @@ import ChatMessage from "./ChatMessage";
 import { useEffect, useState } from "react";
 import { db } from "../firebaseConfig";
 import { onSnapshot, collection } from "firebase/firestore";
+import { useSelector } from "react-redux";
+import { selectChannel } from "../store/slices/uiSlice";
 
-const ChatFeed = ({ chatRoomUid }) => {
+const ChatFeed = () => {
   const [messages, setMessages] = useState([
     { name: "Loading...", id: "initial" },
   ]);
+  const chatRoomUid = useSelector(selectChannel);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -26,7 +29,6 @@ const ChatFeed = ({ chatRoomUid }) => {
 
   return (
     <div className="content-container">
-      {/* <TopNavigation /> */}
       <div className="content-list z-10">
         {/* TODO order messages by date */}
         {messages.map((message) => (

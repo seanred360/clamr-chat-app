@@ -6,7 +6,7 @@ import {
   SignInWithGithub,
 } from "./firebaseConfig";
 
-const SignInPage = () => {
+const LoginPage = () => {
   return (
     <div className="w-screen h-screen flex align-center justify-center">
       <div className="w-96 h-96 mx-auto my-auto p-6 bg-gray-400 rounded-lg drop-shadow-lg">
@@ -60,4 +60,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default LoginPage;

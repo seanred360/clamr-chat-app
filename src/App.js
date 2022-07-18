@@ -1,4 +1,3 @@
-import { useAuthContext } from "./components/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import {
   collection,
@@ -15,26 +14,28 @@ import { db } from "./components/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "./components/store/slices/uiSlice";
+import { selectUser } from "./components/store/slices/authSlice";
+
 import TopNavigation from "./components/TopNavigation";
-import SignInPage from "./components/SignInPage";
 import SideBar from "./components/SideBar";
 import ChannelBar from "./components/ChannelBar";
 import ChatFeed from "./components/chatfeed/ChatFeed";
 import Friends from "./components/channels/friends/Friends";
+import LoginPage from "./components/LoginPage";
+import { selectUserData } from "./components/store/slices/userDataSlice";
 
 function App() {
-  const { user } = useAuthContext();
+  const currentUser = useSelector(selectUser);
 
   return (
     <main className="flex items-center justify-center bg-gray-500 p-6 md:p-0">
-      {user ? <HomePage user={user} /> : <SignInPage />}
+      {currentUser != null ? <HomePage /> : <LoginPage />}
     </main>
   );
 }
 
-function HomePage({ user }) {
-  const [currentChatRoom, setCurrentChatRoom] = useState();
-  const [chatRooms, setChatRooms] = useState();
+function HomePage() {
+  const userData = useSelector(selectUserData);
   const channel = useSelector((state) => state.ui.channel);
   const dispatch = useDispatch();
 
@@ -47,8 +48,8 @@ function HomePage({ user }) {
       const payload = {
         uid: newChatRoomUid,
         createdAt: serverTimestamp(),
-        createdBy: user.uid,
-        members: [user.uid],
+        createdBy: userData.uid,
+        members: [userData.uid],
         modifiedAt: serverTimestamp(),
         name: "Sean Red",
         recentMessage: {
@@ -88,12 +89,7 @@ function HomePage({ user }) {
     // updateUserChatRooms();
   };
 
-  const handleEnterChat = (chatRoomUid, chatRoomName) => {
-    setCurrentChatRoom(chatRoomUid);
-    dispatch(setChannel(chatRoomName));
-  };
-
-  const handleAddFriend = async (newFriend) => {
+  const handleSendFriendRequest = async (newFriend) => {
     const splitFriend = newFriend.trim().split("#");
     const friendName = splitFriend[0];
     const friendDiscriminator = `#${splitFriend[1]}`;
@@ -119,18 +115,19 @@ function HomePage({ user }) {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.discriminator === friendDiscriminator) {
-        addFriend(data.uid);
+        sendRequest(data.uid);
       }
     });
 
-    async function addFriend(friendUid) {
-      const userRef = doc(db, "users", user.uid);
+    async function sendRequest(friendUid) {
+      // update each users requests list on the database
+      const userRef = doc(db, "users", userData.uid);
       const friendRef = doc(db, "users", friendUid);
       const outgoingPayload = {
         outgoingFriendRequests: arrayUnion(friendUid),
       };
       const incomingPayload = {
-        incomingFriendRequests: arrayUnion(user.uid),
+        incomingFriendRequests: arrayUnion(userData.uid),
       };
       await updateDoc(userRef, outgoingPayload);
       await updateDoc(friendRef, incomingPayload);
@@ -138,45 +135,18 @@ function HomePage({ user }) {
     return success;
   };
 
-  useEffect(() => {
-    const getChatRooms = async () => {
-      const chatRoomsRef = collection(db, "chatRooms");
-      const q = query(
-        chatRoomsRef,
-        where("members", "array-contains", user.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      let newChatRooms = [];
-      querySnapshot.forEach((doc) => {
-        newChatRooms.push(doc.data());
-      });
-      setChatRooms(newChatRooms);
-    };
-    getChatRooms();
-  }, []);
-
   return (
     <div className="flex w-full h-screen">
       <SideBar />
-      <ChannelBar
-        user={user}
-        chatRoomData={chatRooms}
-        onEnterChat={handleEnterChat}
-        onCreateChatRoom={handleCreateChatRoom}
-      />
+      <ChannelBar onCreateChatRoom={handleCreateChatRoom} />
       <div className="content-container">
-        <TopNavigation onAddFriend={handleAddFriend} />
+        <TopNavigation onsendRequest={handleSendFriendRequest} />
         {channel == "friends" ? (
           <div className="content-container">
-            <Friends
-              chatRoomData={chatRooms}
-              onEnterChat={handleEnterChat}
-              onAddFriend={handleAddFriend}
-              user={user}
-            />
+            <Friends onsendRequest={handleSendFriendRequest} userData={userData} />
           </div>
         ) : (
-          <ChatFeed chatRoomUid={currentChatRoom} />
+          <ChatFeed />
         )}
       </div>
     </div>

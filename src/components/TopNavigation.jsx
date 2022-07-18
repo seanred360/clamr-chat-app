@@ -5,23 +5,22 @@ import {
   FaMoon,
   FaSun,
 } from "react-icons/fa";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "./firebaseConfig";
-import useDarkMode from "./hooks/useDarkMode";
-import { FaUserFriends } from "react-icons/fa";
 import { MdOutlineAlternateEmail } from "react-icons/md";
+
+import useDarkMode from "./hooks/useDarkMode";
 import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { setSubChannel } from "./store/slices/uiSlice";
-import { useEffect } from "react";
-import { useAuthContext } from "./contexts/AuthContext";
+import { selectUserData } from "./store/slices/userDataSlice";
 
 const TopNavigation = ({ onAddFriend }) => {
   const channel = useSelector((state) => state.ui.channel);
+  const userData = useSelector(selectUserData);
 
   return (
     <div className="top-navigation">
       <ChannelToolbar
+        pendingCount={userData.incomingFriendRequests.length}
         icon={channel == "friends" ? <FriendsIcon /> : <ChatRoomIcon />}
         title={channel}
         onAddFriend={onAddFriend}
@@ -34,24 +33,14 @@ const TopNavigation = ({ onAddFriend }) => {
   );
 };
 
-const ChannelToolbar = ({ icon, title }) => {
-  const { user } = useAuthContext();
-  const [pendingCount, setPendingCount] = useState();
-  const [selected, setSelected] = useState();
+const ChannelToolbar = ({ pendingCount, icon, title }) => {
+  const [selected, setSelected] = useState("all");
   const dispatch = useDispatch();
 
   const handleClick = (selectedButton) => {
     setSelected(selectedButton);
     dispatch(setSubChannel(selectedButton));
   };
-
-  useEffect(() => {
-    // subscribe to the current user's incoming friend requests
-    const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
-      setPendingCount(doc.data().incomingFriendRequests.length);
-    });
-    return unsub;
-  }, [user]);
 
   return (
     <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
@@ -130,6 +119,26 @@ const UserCircle = () => (
   <FaUserCircle size="24" className="top-navigation-icon" />
 );
 const ChatRoomIcon = () => <MdOutlineAlternateEmail />;
-const FriendsIcon = () => <FaUserFriends />;
+const FriendsIcon = () => (
+  <svg
+    x="0"
+    y="0"
+    className="icon-2xnN2Y"
+    aria-hidden="true"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <g fill="none" fillRule="evenodd">
+      <path
+        fill="currentColor"
+        fillRule="nonzero"
+        d="M0.5,0 L0.5,1.5 C0.5,5.65 2.71,9.28 6,11.3 L6,16 L21,16 L21,14 C21,11.34 15.67,10 13,10 C13,10 12.83,10 12.75,10 C8,10 4,6 4,1.5 L4,0 L0.5,0 Z M13,0 C10.790861,0 9,1.790861 9,4 C9,6.209139 10.790861,8 13,8 C15.209139,8 17,6.209139 17,4 C17,1.790861 15.209139,0 13,0 Z"
+        transform="translate(2 4)"
+      ></path>
+      <path d="M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z M0,0 L24,0 L24,24 L0,24 L0,0 Z"></path>
+    </g>
+  </svg>
+);
 
 export default TopNavigation;

@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect, useRef } from "react";
 import { AiOutlineClose, AiOutlineCheck } from "react-icons/ai";
 import {
@@ -9,28 +9,20 @@ import {
   getDocs,
   updateDoc,
   arrayRemove,
-  onSnapshot,
   getDoc,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import ChatRoom from "../ChatRoom";
+import { setChannel } from "../../store/slices/uiSlice";
 
-const Friends = ({ chatRoomData, onEnterChat, onAddFriend, user }) => {
+const Friends = ({ onAddFriend, userData }) => {
   const subChannel = useSelector((state) => state.ui.subChannel);
-  const [userSnapshot, setUserSnapshot] = useState();
-
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
-      setUserSnapshot(doc.data());
-    });
-    return unsub;
-  }, [user]);
 
   if (subChannel === "add friend")
-    return <AddFriend onAddFriend={onAddFriend} />;
+    return <SendFriendRequest onAddFriend={onAddFriend} />;
   if (subChannel === "pending")
-    return <FriendRequestsList userSnapshot={userSnapshot} user={user} />;
-  return <FriendsList chatRoomData={chatRoomData} onEnterChat={onEnterChat} />;
+    return <FriendRequestsList userData={userData} />;
+  return <FriendsList friendChatData={userData.friendChatData} />;
 };
 
 // const SortFriends = () => {
@@ -68,7 +60,7 @@ const Friends = ({ chatRoomData, onEnterChat, onAddFriend, user }) => {
 //   );
 // };
 
-const AddFriend = ({ onAddFriend }) => {
+const SendFriendRequest = ({ onAddFriend }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [status, setStatus] = useState({ error: false, message: "" });
@@ -129,16 +121,16 @@ const AddFriend = ({ onAddFriend }) => {
   );
 };
 
-const FriendRequestsList = ({ userSnapshot, user }) => {
+const FriendRequestsList = ({ userData }) => {
   // the path in the database to find the current user
-  const userDocRef = doc(db, "users", user.uid);
+  const userDocRef = doc(db, "users", userData.uid);
   // an array of user objects with user data
   const [incomingFriendRequests, setIncomingFriendRequests] = useState();
   const [outgoingFriendRequests, setOutgoingFriendRequests] = useState();
 
   useEffect(() => {
     const getFriendRequests = async (type, stateSetter) => {
-      const pendingRequests = userSnapshot[type];
+      const pendingRequests = userData[type];
 
       if (pendingRequests && pendingRequests.length > 0) {
         const q = query(
@@ -159,7 +151,7 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
     getFriendRequests("outgoingFriendRequests", setOutgoingFriendRequests);
 
     return getFriendRequests;
-  }, [userSnapshot]);
+  }, [userData]);
 
   const getPendingCount = () => {
     let count = 0;
@@ -172,7 +164,7 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
     // remove request from current user's list and add to friends list
     await updateDoc(userDocRef, {
       incomingFriendRequests: arrayRemove(requestUid),
-      friendsList: { ...userSnapshot.friendsList, [requestUid]: true },
+      friendsList: { ...userData.friendsList, [requestUid]: true },
     });
 
     // the database path to find the request user
@@ -181,8 +173,8 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
     const requestDocSnap = (await getDoc(requestUserDocRef)).data();
     // remove request from request users list and add to friends list
     await updateDoc(requestUserDocRef, {
-      outgoingFriendRequests: arrayRemove(user.uid),
-      friendsList: { ...requestDocSnap.friendsList, [user.uid]: true },
+      outgoingFriendRequests: arrayRemove(userData.uid),
+      friendsList: { ...requestDocSnap.friendsList, [userData.uid]: true },
     });
     // remove request from our local state
     setIncomingFriendRequests(
@@ -201,12 +193,12 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
     // remove request from declined user's list
     if (type === "incomingFriendRequests") {
       await updateDoc(declinedUserDocRef, {
-        outgoingFriendRequests: arrayRemove(user.uid),
+        outgoingFriendRequests: arrayRemove(userData.uid),
       });
     }
     if (type === "outgoingFriendRequests") {
       await updateDoc(declinedUserDocRef, {
-        incomingFriendRequests: arrayRemove(user.uid),
+        incomingFriendRequests: arrayRemove(userData.uid),
       });
     }
 
@@ -223,8 +215,6 @@ const FriendRequestsList = ({ userSnapshot, user }) => {
       );
       setOutgoingFriendRequests(remove);
     }
-
-    // setIncomingFriendRequests(remove);
   };
 
   if (!incomingFriendRequests && !outgoingFriendRequests) return null;
@@ -294,27 +284,22 @@ const FriendRequest = ({ user, type, onAccept, onDecline }) => {
   );
 };
 
-const FriendsList = ({ chatRoomData, onEnterChat }) => {
-  const [friendChats, setFriendChats] = useState();
+const FriendsList = ({ friendChatData }) => {
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!chatRoomData) return;
-    let result = [];
-    chatRoomData.forEach((chatRoom) => {
-      if (chatRoom.isGroup === false) result.push(chatRoom);
-    });
-    return setFriendChats(result);
-  }, [chatRoomData]);
+  const handleEnterChat = () => {
+    dispatch(setChannel(friendChatData.uid));
+  };
 
-  if (!friendChats) return null;
+  if (!friendChatData) return null;
   return (
     <div>
-      <h1 className="text-white">ALL FRIENDS - {friendChats.length}</h1>
-      {friendChats.map((chatRoom) => (
+      <h1 className="text-white">ALL FRIENDS - {friendChatData.length}</h1>
+      {friendChatData.map((chatRoom) => (
         <ChatRoom
           key={chatRoom.uid}
           chatRoomData={chatRoom}
-          onEnterChat={onEnterChat}
+          onEnterChat={handleEnterChat}
         />
       ))}
     </div>
