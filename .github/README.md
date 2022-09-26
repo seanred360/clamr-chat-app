@@ -1,4 +1,5 @@
 # Clamr
+
 ![Clamr-1 (1)](https://user-images.githubusercontent.com/41050673/192335951-31d69737-6b0b-4dca-bbf9-2dfaac113194.png)
 
 ## Table of contents
@@ -44,3 +45,7 @@ Users should be able to:
 ### Screenshots
 
 https://user-images.githubusercontent.com/41050673/192324426-3102e396-9f2b-499f-ba3b-7fd389c29d79.mp4
+
+### Links
+
+[See the live site here](https://clamr.netlify.app/)
