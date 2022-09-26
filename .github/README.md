@@ -1,6 +1,5 @@
 # Clamr
-
-Clamr is a Discord clone in progress.
+![Clamr-1 (1)](https://user-images.githubusercontent.com/41050673/192335951-31d69737-6b0b-4dca-bbf9-2dfaac113194.png)
 
 ## Table of contents
 
@@ -41,3 +40,7 @@ Users should be able to:
 - Add emoji reactions to messages
 - Edit their own messages
 - See who is online in realtime
+
+### Screenshots
+
+https://user-images.githubusercontent.com/41050673/192324426-3102e396-9f2b-499f-ba3b-7fd389c29d79.mp4
