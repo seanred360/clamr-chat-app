@@ -73,13 +73,13 @@ export const Logout = () => {
 };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_1QrTMmDxVFONadfSmDk4GQx42NCFr_o",
-  authDomain: "clamr-44a14.firebaseapp.com",
-  projectId: "clamr-44a14",
-  storageBucket: "clamr-44a14.appspot.com",
-  messagingSenderId: "859289877214",
-  appId: "1:859289877214:web:7854c05e9480b48a9aa04f",
-  measurementId: "G-LYGEHL5PYP",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
