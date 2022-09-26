@@ -45,7 +45,7 @@ const ChannelToolbar = ({ pendingCount, icon, title }) => {
   return (
     <div className="w-full h-10 flex items-center justify-left p-6 text-base text-center text-white">
       <span className="mr-3 text-xl text-gray-500">{icon}</span>
-      <span className="ellipsis pr-3 border-r-[1px] border-gray-600 font-bold tracking-wide capitalize">
+      <span className="ellipsis pr-3 border-r-[1px] border-gray-600 font-bold tracking-wide capitalize w-[100px]">
         {title}
       </span>
       <button

@@ -64,7 +64,7 @@ const ChatMessage = ({
   );
 
   return (
-    <div className="post group">
+    <div className="post group mt-auto mb-10">
       <img
         key={`avatar ${uuidv4()}`}
         src={photoURL}

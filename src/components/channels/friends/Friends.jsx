@@ -27,6 +27,10 @@ const Friends = ({ onSendRequest, onCreateChatRoom, userData }) => {
         onCreateChatRoom={onCreateChatRoom}
       />
     );
+    if (subChannel === "blocked")
+    return (
+      <h1>Coming soon</h1>
+    );
   return <FriendsList friendChatData={userData.friendChatData} />;
 };
 

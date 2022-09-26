@@ -11,16 +11,16 @@ const SideBar = () => {
     >
       <SideBarIcon icon={<SiDiscord size="28" />} text="Home" />
       <Divider />
-      <SideBarIcon icon={<BsPlus size="32" />} text="Add a Server" />
+      <SideBarIcon icon={<BsPlus size="32" />} text="Coming soon" />
       <SideBarIcon
         icon={<IoCompass size="20" />}
-        text="Explore Public Servers"
+        text="Coming soon"
       />
       <Divider />
       <SideBarIcon
         icon={<HiOutlineDownload />}
         size="22"
-        text="Download Apps"
+        text="Coming soon"
       />
     </div>
   );

@@ -21,8 +21,8 @@ const ChannelBar = ({ onCreateChatRoom }) => {
   const [chatRoomData, setChatRoomData] = useState();
 
   useEffect(() => {
-    if (friendChatData != null || groupChatData != null)
-      setChatRoomData([...friendChatData, ...groupChatData]);
+    if (friendChatData != null) setChatRoomData([...friendChatData]);
+    if (groupChatData != null) setChatRoomData([...groupChatData]);
   }, [groupChatData, friendChatData]);
 
   return (
@@ -101,7 +101,7 @@ const NitroButton = ({ isSelected }) => (
     <span className="mr-3 text-xl">
       <IoLogoIonitron />
     </span>
-    <span>Nitro</span>
+    <span>Coming soon</span>
   </button>
 );
 
@@ -132,7 +132,7 @@ const UserBlock = () => {
   const currentUser = useSelector(selectUser);
 
   return (
-    <div className="fixed w-[250px] bottom-0 flex align-center justify-center m-t-[auto] p-2 bg-gray-900/50 text-gray-400">
+    <div className="flex align-center justify-center mt-[auto] p-2 bg-gray-900/50 text-gray-400">
       <img
         className="rounded-full w-9"
         src={currentUser.photoURL}
