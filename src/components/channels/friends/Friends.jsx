@@ -306,7 +306,7 @@ const FriendsList = ({ friendChatData }) => {
   if (!friendChatData) return null;
   return (
     <div>
-      <h1 className="text-white">ALL FRIENDS - {friendChatData.length}</h1>
+      <h1 className="dark:text-white">ALL FRIENDS - {friendChatData.length}</h1>
       {friendChatData.map((chatRoom) => (
         <ChatRoom
           key={chatRoom.uid}

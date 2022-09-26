@@ -19,11 +19,11 @@ main {
 @layer components {
   .channelButton {
     @apply w-full flex items-center my-1 p-2 
-    text-zinc-400 rounded text-base text-center hover:bg-zinc-700 hover:text-white;
+    text-black dark:text-zinc-400 rounded text-base text-center hover:bg-zinc-700 hover:text-white;
   }
 
   .channelButton.selected {
-    @apply bg-zinc-700 text-white hover:opacity-80;
+    @apply bg-zinc-700 text-white dark:bg-zinc-700 dark:text-white hover:opacity-80;
   }
 
   .ellipsis {
@@ -34,7 +34,7 @@ main {
     @apply relative flex items-center justify-center 
     h-12 w-12 mt-2 mb-2 mx-auto  
   bg-gray-400 hover:bg-green-600 dark:bg-gray-800 dark:hover:bg-green-600
-  text-green-500 hover:text-white
+  dark:text-green-500 hover:text-white
     hover:rounded-xl rounded-3xl
     transition-all duration-150 ease-linear
     cursor-pointer shadow-lg;
@@ -137,8 +137,8 @@ main {
   }
 
   .friendsToolbarButton {
-    @apply flex items-center mx-2 px-2 py-1 rounded-md hover:bg-gray-600/50 hover:text-white
-    text-gray-400 text-sm tracking-wide;
+    @apply flex items-center mx-2 px-2 py-1 rounded-md text-black hover:bg-gray-600/50 hover:text-white
+    dark:text-gray-400 text-sm tracking-wide;
   }
 
   .friendsToolbarButton.selected {
