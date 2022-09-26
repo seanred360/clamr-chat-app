@@ -36,3 +36,6 @@ Users should be able to:
 - See who is online in realtime
 
 ### Screenshots
+
+https://user-images.githubusercontent.com/41050673/192322836-f00eaba3-2a5f-4258-abb5-31858da07896.mp4
+
