@@ -1,5 +1,5 @@
 # Clamr
-![Clamr-1](https://user-images.githubusercontent.com/41050673/192326013-11405969-701c-47f7-b117-a75d18bcde6d.png)
+![Clamr-1 (1)](https://user-images.githubusercontent.com/41050673/192335951-31d69737-6b0b-4dca-bbf9-2dfaac113194.png)
 
 ## Table of contents
 
