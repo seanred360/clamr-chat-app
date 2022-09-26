@@ -37,5 +37,4 @@ Users should be able to:
 
 ### Screenshots
 
-https://user-images.githubusercontent.com/41050673/192322836-f00eaba3-2a5f-4258-abb5-31858da07896.mp4
-
+https://user-images.githubusercontent.com/41050673/192324426-3102e396-9f2b-499f-ba3b-7fd389c29d79.mp4
