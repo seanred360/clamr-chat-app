@@ -31,7 +31,7 @@ const FirestoreListener = () => {
         dispatch(logout());
       }
     });
-  }, []);
+  }, [dispatch]);
 
   // listen for database changes on the current user
   useEffect(() => {

@@ -8,11 +8,10 @@ import {
   serverTimestamp,
   updateDoc,
   arrayUnion,
-  addDoc,
 } from "firebase/firestore";
 import { db } from "./components/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { selectUser } from "./components/store/slices/authSlice";
 
 import TopNavigation from "./components/TopNavigation";
@@ -143,7 +142,7 @@ function HomePage() {
       <ChannelBar onCreateChatRoom={handleCreateChatRoom} />
       <div className="content-container">
         <TopNavigation onSendRequest={handleSendFriendRequest} />
-        {channel == "friends" ? (
+        {channel === "friends" ? (
           <div className="content-container">
             <Friends
               onSendRequest={handleSendFriendRequest}

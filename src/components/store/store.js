@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authSlice, { loginSuccess } from "./slices/authSlice";
+import authSlice from "./slices/authSlice";
 import uiReducer from "./slices/uiSlice";
 import userDataReducer from "./slices/userDataSlice";
 import thunk from "redux-thunk";

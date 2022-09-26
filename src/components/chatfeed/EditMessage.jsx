@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
-import { doc, setDoc, collection } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 const EditMessage = ({ chatRoomUid, messageUid, content, onHide }) => {
   const [input, setInput] = useState("");
 
-  const handleCancel = (e) => {
-    if (e.isComposing || e.keyCode === 27) {
-      onHide();
-    }
-  };
-
   useEffect(() => {
+    const handleCancel = (e) => {
+      if (e.isComposing || e.keyCode === 27) {
+        onHide();
+      }
+    };
+
     window.addEventListener("keydown", handleCancel, false);
     return () => window.removeEventListener("keydown", handleCancel, false);
-  }, []);
+  }, [onHide]);
 
   const handleSetDoc = async (e) => {
     e.preventDefault();

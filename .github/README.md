@@ -17,6 +17,13 @@ Clamr is a Discord clone in progress.
 
 ## Overview
 
+### Built with
+
+- ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+- ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase)
+- ![Redux](https://img.shields.io/badge/redux-%23593d88.svg?style=for-the-badge&logo=redux&logoColor=white)
+- ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
 ### User Stories
 
 Users should be able to:
@@ -34,5 +41,3 @@ Users should be able to:
 - Add emoji reactions to messages
 - Edit their own messages
 - See who is online in realtime
-
-### Screenshots

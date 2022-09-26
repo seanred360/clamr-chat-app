@@ -94,7 +94,7 @@ const SendFriendRequest = ({ onSendRequest }) => {
         className={
           hasSubmitted
             ? `flex w-full h-14 px-4 py-2 bg-gray-900 rounded-lg ${
-                status.error == true
+                status.error === true
                   ? "border-red-500 border-2"
                   : "border-green-500 border-2"
               }`
@@ -106,7 +106,7 @@ const SendFriendRequest = ({ onSendRequest }) => {
           placeholder:text-zinc-400"
           type="text"
           placeholder="Enter a Username#0000"
-          onChange={(e) => setIsTyping(e.target.value != "")}
+          onChange={(e) => setIsTyping(e.target.value !== "")}
           ref={searchRef}
         />
         <button
@@ -120,7 +120,7 @@ const SendFriendRequest = ({ onSendRequest }) => {
       {hasSubmitted && (
         <span
           className={`mt-3 text-sm ${
-            status.error == true ? "text-red-400" : "text-green-400"
+            status.error === true ? "text-red-400" : "text-green-400"
           }`}
         >
           {status.message}

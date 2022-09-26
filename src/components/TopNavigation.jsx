@@ -21,7 +21,7 @@ const TopNavigation = ({ onAddFriend }) => {
     <div className="top-navigation">
       <ChannelToolbar
         pendingCount={userData.incomingFriendRequests.length}
-        icon={channel == "friends" ? <FriendsIcon /> : <ChatRoomIcon />}
+        icon={channel === "friends" ? <FriendsIcon /> : <ChatRoomIcon />}
         title={channel}
         onAddFriend={onAddFriend}
       />
@@ -51,21 +51,21 @@ const ChannelToolbar = ({ pendingCount, icon, title }) => {
       <button
         onClick={() => handleClick("online")}
         className={`friendsToolbarButton  ${
-          selected == "online" && "selected"
+          selected === "online" && "selected"
         }`}
       >
         Online
       </button>
       <button
         onClick={() => handleClick("all")}
-        className={`friendsToolbarButton  ${selected == "all" && "selected"}`}
+        className={`friendsToolbarButton  ${selected === "all" && "selected"}`}
       >
         All
       </button>
       <button
         onClick={() => handleClick("pending")}
         className={`friendsToolbarButton  ${
-          selected == "pending" && "selected"
+          selected === "pending" && "selected"
         }`}
       >
         Pending{" "}
@@ -78,7 +78,7 @@ const ChannelToolbar = ({ pendingCount, icon, title }) => {
       <button
         onClick={() => handleClick("blocked")}
         className={`friendsToolbarButton  ${
-          selected == "blocked" && "selected"
+          selected === "blocked" && "selected"
         }`}
       >
         Blocked
@@ -86,7 +86,7 @@ const ChannelToolbar = ({ pendingCount, icon, title }) => {
       <button
         onClick={() => handleClick("add friend")}
         className={`friendsToolbarButton friendsToolbarButton bg-green-600 text-white 
-      ${selected == "add friend" && "selected"}`}
+      ${selected === "add friend" && "selected"}`}
       >
         Add Friend
       </button>

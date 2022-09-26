@@ -6,16 +6,16 @@ const EmojiPicker = ({
   onCancel,
   onEmojiSelect,
 }) => {
-  const handleCancel = (e) => {
-    if (e.isComposing || e.keyCode === 27) {
-      onCancel();
-    }
-  };
-
   useEffect(() => {
+    const handleCancel = (e) => {
+      if (e.isComposing || e.keyCode === 27) {
+        onCancel();
+      }
+    };
+
     window.addEventListener("keydown", handleCancel, false);
     return () => window.removeEventListener("keydown", handleCancel, false);
-  }, []);
+  }, [onCancel]);
 
   const smileys = [
     "😀",
@@ -131,7 +131,7 @@ const EmojiPicker = ({
     "😾",
   ];
 
-  if (showPicker == false) return null;
+  if (showPicker === false) return null;
   return (
     <>
       <div className="fixed right-10 bottom-20 z-[100]">

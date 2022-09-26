@@ -4,13 +4,7 @@ import EmojiPicker from "./EmojiPicker";
 import { BsPencilFill } from "react-icons/bs";
 import { MdAddReaction } from "react-icons/md";
 import { v4 as uuidv4 } from "uuid";
-import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { auth } from "../firebaseConfig";
 
@@ -45,22 +39,24 @@ const ChatMessage = ({
     await setDoc(docRef, payload, { merge: true });
   };
 
-  const handleDeleteReaction = async (reaction) => {
-    const docRef = doc(db, `messages/${messageUid}/reactions/${reaction}`);
-    const docSnap = await (await getDoc(docRef)).data();
-    const payload = {
-      ...docSnap,
-      [auth.currentUser.displayName]: `${reaction}`,
-    };
-    await setDoc(docRef, payload);
-  };
+  //TODO add delete reaction function
+
+  // const handleDeleteReaction = async (reaction) => {
+  //   const docRef = doc(db, `messages/${messageUid}/reactions/${reaction}`);
+  //   const docSnap = await (await getDoc(docRef)).data();
+  //   const payload = {
+  //     ...docSnap,
+  //     [auth.currentUser.displayName]: `${reaction}`,
+  //   };
+  //   await setDoc(docRef, payload);
+  // };
 
   useEffect(
     () =>
       onSnapshot(doc(db, `reactions/${messageUid}`), (snapshot) => {
         setReactions(snapshot.data());
       }),
-    []
+    [messageUid]
   );
 
   return (

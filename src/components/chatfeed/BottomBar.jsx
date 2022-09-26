@@ -26,7 +26,7 @@ const BottomBar = ({ chatRoomUid }) => {
       photoURL,
       time: new Date().getTime(),
     };
-    const docRef = await addDoc(collectionRef, payload);
+    await addDoc(collectionRef, payload);
   };
 
   return (

@@ -29,10 +29,10 @@ const ChannelBar = ({ onCreateChatRoom }) => {
     <div className="channel-bar shadow-lg p-2 text-white">
       <TitleBlock channelName={"Home"} />
       <FriendsListButton
-        isSelected={channel == "friends"}
+        isSelected={channel === "friends"}
         handleClick={dispatch}
       />
-      <NitroButton isSelected={channel == "nitro"} />
+      <NitroButton isSelected={channel === "nitro"} />
       <DirectMessagesTitle onCreateChatRoom={onCreateChatRoom} />
       <DirectMessages
         chatRoomData={chatRoomData}

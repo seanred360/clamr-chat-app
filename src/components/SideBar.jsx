@@ -1,4 +1,4 @@
-import { BsPlus, BsGearFill } from "react-icons/bs";
+import { BsPlus } from "react-icons/bs";
 import { SiDiscord } from "react-icons/si";
 import { IoCompass } from "react-icons/io5";
 import { HiOutlineDownload } from "react-icons/hi";
@@ -12,16 +12,9 @@ const SideBar = () => {
       <SideBarIcon icon={<SiDiscord size="28" />} text="Home" />
       <Divider />
       <SideBarIcon icon={<BsPlus size="32" />} text="Coming soon" />
-      <SideBarIcon
-        icon={<IoCompass size="20" />}
-        text="Coming soon"
-      />
+      <SideBarIcon icon={<IoCompass size="20" />} text="Coming soon" />
       <Divider />
-      <SideBarIcon
-        icon={<HiOutlineDownload />}
-        size="22"
-        text="Coming soon"
-      />
+      <SideBarIcon icon={<HiOutlineDownload />} size="22" text="Coming soon" />
     </div>
   );
 };

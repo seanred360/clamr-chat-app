@@ -12,28 +12,28 @@ const ChatRoom = ({ chatRoomData }) => {
   const channel = useSelector((state) => state.ui.channel);
   const dispatch = useDispatch();
 
-  const setDisplayData = (chatMemberArray) => {
-    // remove the current user from the members because we do not need to display their photo or name to themself
-    const filteredMembers = chatMemberArray.filter(
-      (member) => member.uid !== user.uid
-    );
-
-    if (chatRoomData.isGroup == true) {
-      let chatMemberNames = [];
-      filteredMembers.forEach(
-        (member) => (chatMemberNames += member.displayName + ", ")
+  useEffect(() => {
+    const setDisplayData = (chatMemberArray) => {
+      // remove the current user from the members because we do not need to display their photo or name to themself
+      const filteredMembers = chatMemberArray.filter(
+        (member) => member.uid !== user.uid
       );
 
-      setChatMembers({
-        photoURL: GroupIcon,
-        displayName: chatMemberNames,
-      });
-    } else {
-      setChatMembers(filteredMembers[0]);
-    }
-  };
+      if (chatRoomData.isGroup === true) {
+        let chatMemberNames = [];
+        filteredMembers.forEach(
+          (member) => (chatMemberNames += member.displayName + ", ")
+        );
 
-  useEffect(() => {
+        setChatMembers({
+          photoURL: GroupIcon,
+          displayName: chatMemberNames,
+        });
+      } else {
+        setChatMembers(filteredMembers[0]);
+      }
+    };
+
     const getChatMembersData = async () => {
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("uid", "in", [...chatRoomData.members]));
@@ -45,12 +45,12 @@ const ChatRoom = ({ chatRoomData }) => {
       setDisplayData(membersData);
     };
     getChatMembersData();
-  }, []);
+  }, [chatRoomData,user]);
 
   if (!chatMembers) return null;
   return (
     <button
-      className={`channelButton ${channel == chatRoomData.name && "selected"}`}
+      className={`channelButton ${channel === chatRoomData.name && "selected"}`}
       onClick={() => dispatch(setChannel(chatRoomData.uid))}
     >
       <img
