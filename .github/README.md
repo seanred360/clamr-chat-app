@@ -1,7 +1,4 @@
 # Clamr
-
-
-Clamr is a Discord clone in progress.
 ![Clamr-1](https://user-images.githubusercontent.com/41050673/192326013-11405969-701c-47f7-b117-a75d18bcde6d.png)
 
 ## Table of contents
@@ -18,6 +15,8 @@ Clamr is a Discord clone in progress.
 - [Acknowledgments](#acknowledgments)
 
 ## Overview
+
+Clamr is a Discord clone in progress.
 
 ### User Stories
 
