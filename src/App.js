@@ -61,7 +61,7 @@ function HomePage() {
         },
         isGroup: false,
       };
-      const result = await setDoc(docRef, payload);
+      await setDoc(docRef, payload);
       console.log("created a new DM chat room");
     };
     createChatRoom(chatMembers);

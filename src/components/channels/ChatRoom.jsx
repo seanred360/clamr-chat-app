@@ -12,28 +12,29 @@ const ChatRoom = ({ chatRoomData }) => {
   const channel = useSelector((state) => state.ui.channel);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const setDisplayData = (chatMemberArray) => {
-      // remove the current user from the members because we do not need to display their photo or name to themself
-      const filteredMembers = chatMemberArray.filter(
-        (member) => member.uid !== user.uid
+  const setDisplayData = (chatMemberArray) => {
+    // remove the current user from the members because we do not need to display their photo or name to themself
+    if (chatMemberArray === chatMembers) return;
+    const filteredMembers = chatMemberArray.filter(
+      (member) => member.uid !== user.uid
+    );
+
+    if (chatRoomData.isGroup === true) {
+      let chatMemberNames = [];
+      filteredMembers.forEach(
+        (member) => (chatMemberNames += member.displayName + ", ")
       );
 
-      if (chatRoomData.isGroup === true) {
-        let chatMemberNames = [];
-        filteredMembers.forEach(
-          (member) => (chatMemberNames += member.displayName + ", ")
-        );
+      setChatMembers({
+        photoURL: GroupIcon,
+        displayName: chatMemberNames,
+      });
+    } else {
+      setChatMembers(filteredMembers[0]);
+    }
+  };
 
-        setChatMembers({
-          photoURL: GroupIcon,
-          displayName: chatMemberNames,
-        });
-      } else {
-        setChatMembers(filteredMembers[0]);
-      }
-    };
-
+  useEffect(() => {
     const getChatMembersData = async () => {
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("uid", "in", [...chatRoomData.members]));
@@ -45,7 +46,7 @@ const ChatRoom = ({ chatRoomData }) => {
       setDisplayData(membersData);
     };
     getChatMembersData();
-  }, [chatRoomData,user]);
+  }, [setDisplayData, chatRoomData, user]);
 
   if (!chatMembers) return null;
   return (

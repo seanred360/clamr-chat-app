@@ -12,7 +12,7 @@ import {
   signOut,
   // updateProfile,
 } from "firebase/auth";
-// import { useAuthState } from "react-firebase-hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 // import { v4 as uuidv4 } from "uuid";
 
 const AuthContext = createContext();
@@ -28,7 +28,7 @@ export const useAuthContext = () => {
 };
 
 const AuthProvider = ({ children, initialData }) => {
-  // const [user] = useAuthState(auth);
+  const [user] = useAuthState(auth);
   // const [loading, setLoading] = useState(true);
 
   function SignInWithGoogle() {
@@ -130,6 +130,7 @@ const AuthProvider = ({ children, initialData }) => {
   };
 
   const value = {
+    user,
     SignInWithGoogle,
     SignInWithFacebook,
     SignInWithGithub,

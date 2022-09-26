@@ -5,12 +5,12 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   GithubAuthProvider,
-  TwitterAuthProvider,
-  OAuthProvider,
-  signInAnonymously,
+  // TwitterAuthProvider,
+  // OAuthProvider,
+  // signInAnonymously,
   getAuth,
   signOut,
-  updateProfile,
+  // updateProfile,
   onAuthStateChanged,
 } from "firebase/auth";
 
