@@ -1,5 +1,5 @@
 # Clamr
-![Clamr-1](https://user-images.githubusercontent.com/41050673/192325522-432f8dfe-a680-4658-b806-e58644a378d8.png)
+![Clamr-1](https://user-images.githubusercontent.com/41050673/192325842-e72af006-45df-480a-a0dc-ca5428a4f996.png)
 
 Clamr is a Discord clone in progress.
 
